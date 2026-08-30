@@ -3,8 +3,8 @@
 <head>
   <meta charset="UTF-8" />
   <meta name="viewport" content="width=device-width, initial-scale=1.0" />
-  <title>Тайлан — Hilchin Billiard</title>
-  <link rel="stylesheet" href="style.css" />
+  <title>Тайлан — Хилчин Биллиард</title>
+  <link rel="stylesheet" href="style.css?v=2" />
 </head>
 <body>
   <div id="hb-navbar"></div>
@@ -16,7 +16,8 @@
 
     <div class="card" style="margin-bottom:20px;">
       <div class="preset-btns">
-        <button type="button" class="btn btn-ghost btn-sm" data-preset="today">Өдөр (10:00 ээлж)</button>
+        <button type="button" class="btn btn-ghost btn-sm" data-preset="today">Өнөөдөр (10:00 ээлж)</button>
+        <button type="button" class="btn btn-ghost btn-sm" data-preset="yesterday">Өчигдөр</button>
         <button type="button" class="btn btn-ghost btn-sm" data-preset="week">7 хоног</button>
         <button type="button" class="btn btn-ghost btn-sm" data-preset="month">Сар</button>
         <button type="button" class="btn btn-ghost btn-sm" data-preset="halfyear">Хагас жил</button>
@@ -81,6 +82,10 @@
       </div>
       <div>
         <div class="section-title" style="margin-top:0;">Барааны үлдэгдэл</div>
+        <div class="card" style="margin-bottom:12px; padding:14px 18px;">
+          <span class="muted" style="font-size:0.82rem;">Нийт нөөцийн үнэлгээ: </span>
+          <strong id="hb-stock-total-value" style="color:var(--primary);">0₮</strong>
+        </div>
         <table class="data-table">
           <thead>
             <tr><th>Бараа</th><th>Төрөл</th><th>Үлдэгдэл</th></tr>
@@ -117,9 +122,9 @@
 
   <script src="https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2/dist/umd/supabase.min.js"></script>
   <script src="https://cdn.jsdelivr.net/npm/chart.js@4/dist/chart.umd.min.js"></script>
-  <script src="config.js"></script>
-  <script src="supabaseClient.js"></script>
-  <script src="auth.js"></script>
-  <script src="reports.js"></script>
+  <script src="config.js?v=2"></script>
+  <script src="supabaseClient.js?v=2"></script>
+  <script src="auth.js?v=2"></script>
+  <script src="reports.js?v=2"></script>
 </body>
 </html>
