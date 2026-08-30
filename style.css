@@ -173,13 +173,18 @@ h1, h2, h3, .nav-brand, .login-title, .hero-overlay h1 {
     url('table-mini.png?v=3') center/cover no-repeat;
 }
 .table-card.occupied:hover { border-color: rgba(239,83,80,0.65); }
-.table-card-head { display: flex; align-items: center; justify-content: space-between; }
+.table-card-head { display: flex; align-items: center; justify-content: space-between; flex-wrap: wrap; gap: 8px; }
 .table-card-head h3 { margin: 0; font-size: 1.08rem; font-family: "Poppins", sans-serif; }
 .table-card-rate { color: var(--muted); font-size: 0.85rem; }
 
-.badge { font-size: 0.7rem; font-weight: 700; padding: 4px 11px; border-radius: 999px; text-transform: uppercase; letter-spacing: 0.03em; }
-.badge-available { background: rgba(63,184,127,0.16); color: var(--success); box-shadow: inset 0 0 0 1px rgba(63,184,127,0.25); }
-.badge-occupied { background: rgba(239,83,80,0.16); color: #ff8783; box-shadow: inset 0 0 0 1px rgba(239,83,80,0.3); }
+.badge {
+  font-size: 0.7rem; font-weight: 700; padding: 4px 11px; border-radius: 999px;
+  text-transform: uppercase; letter-spacing: 0.03em;
+  backdrop-filter: blur(8px); -webkit-backdrop-filter: blur(8px);
+  white-space: nowrap;
+}
+.badge-available { background: rgba(15,40,28,0.82); color: #6fe3a8; box-shadow: inset 0 0 0 1px rgba(63,184,127,0.45); }
+.badge-occupied { background: rgba(48,14,13,0.82); color: #ff9d9a; box-shadow: inset 0 0 0 1px rgba(239,83,80,0.5); }
 
 .table-timer { background: rgba(0,0,0,0.28); border-radius: 10px; padding: 12px; text-align: center; }
 .timer-time { font-size: 1.35rem; font-weight: 700; font-variant-numeric: tabular-nums; color: var(--primary-soft); letter-spacing: 0.02em; }

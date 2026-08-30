@@ -170,7 +170,7 @@ const HB_App = {
       <div class="table-card occupied" data-table-id="${t.id}">
         <div class="table-card-head">
           <h3>${t.name}</h3>
-          <span class="badge badge-occupied">Эзэлсэн</span>
+          <span class="badge badge-occupied">Тоглож байна</span>
         </div>
         <div class="table-card-rate">
           ${this.formatMoney(t.hourly_rate)} / цаг
