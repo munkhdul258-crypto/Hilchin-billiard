@@ -1,0 +1,36 @@
+<!doctype html>
+<html lang="mn">
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+  <title>Ажилтан — Hilchin Billiard</title>
+  <link rel="stylesheet" href="css/style.css" />
+</head>
+<body>
+  <div id="hb-navbar"></div>
+
+  <div class="page">
+    <div class="page-header">
+      <h1>Ажилтны эрх</h1>
+    </div>
+
+    <p class="muted" style="margin-bottom:16px;">
+      Шинэ ажилтныг Supabase Dashboard → Authentication → Add user хэсгээр нэмнэ.
+      Нэмсний дараа тэд энд харагдаж, эрхийг нь энд солиход хангалттай.
+    </p>
+
+    <table class="data-table">
+      <thead>
+        <tr><th>Нэр</th><th>Имэйл</th><th>Эрх</th><th>Бүртгүүлсэн</th></tr>
+      </thead>
+      <tbody id="hb-staff-body"></tbody>
+    </table>
+  </div>
+
+  <script src="https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2/dist/umd/supabase.min.js"></script>
+  <script src="js/config.js"></script>
+  <script src="js/supabaseClient.js"></script>
+  <script src="js/auth.js"></script>
+  <script src="js/staff.js"></script>
+</body>
+</html>

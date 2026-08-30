@@ -1,0 +1,39 @@
+<!doctype html>
+<html lang="mn">
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+  <title>Нэвтрэх — Hilchin Billiard</title>
+  <link rel="stylesheet" href="css/style.css" />
+</head>
+<body>
+  <div class="login-wrap">
+    <div class="login-card">
+      <div class="login-logo">🎱</div>
+      <div class="login-title">Hilchin Billiard</div>
+
+      <div id="hb-login-error" class="error-box hidden"></div>
+
+      <form id="hb-login-form">
+        <div class="form-group">
+          <label for="hb-email">Имэйл</label>
+          <input type="email" id="hb-email" required placeholder="ажилтны@имэйл.com" />
+        </div>
+        <div class="form-group">
+          <label for="hb-password">Нууц үг</label>
+          <input type="password" id="hb-password" required placeholder="••••••••" />
+        </div>
+        <button type="submit" class="btn btn-primary btn-full">Нэвтрэх</button>
+      </form>
+      <p class="muted" style="text-align:center; margin-top:16px; font-size:0.82rem;">
+        Шинэ ажилтны эрхийг админ Supabase Dashboard-оос үүсгэнэ.
+      </p>
+    </div>
+  </div>
+
+  <script src="https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2/dist/umd/supabase.min.js"></script>
+  <script src="js/config.js"></script>
+  <script src="js/supabaseClient.js"></script>
+  <script src="js/login.js"></script>
+</body>
+</html>
