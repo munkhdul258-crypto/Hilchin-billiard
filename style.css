@@ -124,6 +124,22 @@ input, select {
 }
 input:focus, select:focus { outline: 2px solid #bfdbfe; border-color: var(--primary); }
 
+/* Hero (dashboard banner) */
+.hero {
+  height: 180px;
+  background-size: cover;
+  background-position: center 60%;
+  position: relative;
+}
+.hero-overlay {
+  position: absolute; inset: 0;
+  background: linear-gradient(180deg, rgba(15,23,42,0.15), rgba(15,23,42,0.75));
+  display: flex; flex-direction: column; align-items: center; justify-content: center;
+  color: #fff; text-align: center;
+}
+.hero-overlay h1 { margin: 0 0 4px; font-size: 1.6rem; }
+.hero-overlay p { margin: 0; opacity: 0.9; font-size: 0.9rem; }
+
 /* Login page */
 .login-wrap {
   min-height: 100vh;
@@ -131,8 +147,10 @@ input:focus, select:focus { outline: 2px solid #bfdbfe; border-color: var(--prim
   align-items: center;
   justify-content: center;
   padding: 20px;
+  background-size: cover;
+  background-position: center;
 }
-.login-card { width: 100%; max-width: 380px; background: var(--surface); border: 1px solid var(--border); border-radius: var(--radius); padding: 32px; }
+.login-card { width: 100%; max-width: 380px; background: var(--surface); border: 1px solid var(--border); border-radius: var(--radius); padding: 32px; box-shadow: 0 20px 50px rgba(0,0,0,0.35); }
 .login-logo { text-align: center; font-size: 2rem; margin-bottom: 6px; }
 .login-title { text-align: center; font-weight: 700; font-size: 1.2rem; margin-bottom: 24px; }
 .login-card .form-group { margin-bottom: 14px; }
@@ -155,4 +173,43 @@ table.data-table tr:last-child td { border-bottom: none; }
 .section-title { font-size: 1rem; font-weight: 700; margin: 28px 0 12px; }
 .chart-wrap { background: var(--surface); border: 1px solid var(--border); border-radius: var(--radius); padding: 20px; margin-bottom: 24px; }
 
-.preset-btns { display: flex; gap: 8px; margin-bottom: 4px; }
+.preset-btns { display: flex; gap: 8px; margin-bottom: 4px; flex-wrap: wrap; }
+
+/* Session items (bar-code, устгах гэх мэт) */
+.item-list { display: flex; flex-direction: column; gap: 4px; font-size: 0.82rem; }
+.item-row { display: flex; justify-content: space-between; align-items: center; color: var(--muted); }
+.item-remove {
+  border: none; background: none; color: var(--danger); font-size: 1rem;
+  cursor: pointer; margin-left: 6px; line-height: 1; padding: 0 2px;
+}
+.add-item-form { display: flex; gap: 6px; align-items: center; }
+.add-item-form select { flex: 1; min-width: 0; }
+
+/* Navbar bell / notifications */
+.nav-bell { position: relative; background: none; border: none; cursor: pointer; font-size: 1.1rem; padding: 6px; }
+.nav-bell-dot {
+  position: absolute; top: 2px; right: 2px; background: var(--danger); color: #fff;
+  font-size: 0.62rem; font-weight: 700; border-radius: 999px; min-width: 16px; height: 16px;
+  display: flex; align-items: center; justify-content: center; padding: 0 3px;
+}
+.nav-bell-panel {
+  position: absolute; right: 0; top: 38px; width: 300px; background: var(--surface);
+  border: 1px solid var(--border); border-radius: 10px; box-shadow: 0 8px 24px rgba(0,0,0,0.12);
+  padding: 10px; z-index: 20;
+}
+.nav-bell-panel .bell-item { padding: 8px 6px; border-bottom: 1px solid var(--border); font-size: 0.85rem; }
+.nav-bell-panel .bell-item:last-child { border-bottom: none; }
+.nav-bell-panel a { color: var(--primary); text-decoration: none; }
+.nav-bell-wrap { position: relative; }
+
+/* Status pill (stock/debt) */
+.status-pill { font-size: 0.72rem; font-weight: 700; padding: 3px 9px; border-radius: 999px; }
+.status-pending { background: #fef3c7; color: #92400e; }
+.status-approved, .status-paid { background: #dcfce7; color: var(--success); }
+.status-rejected { background: #fee2e2; color: var(--danger); }
+.status-unpaid { background: #fee2e2; color: var(--danger); }
+.status-overdue { background: #fecaca; color: #991b1b; }
+
+.upload-preview { max-width: 120px; max-height: 90px; border-radius: 6px; margin-top: 6px; display: block; }
+.two-col { display: grid; grid-template-columns: 1fr 1fr; gap: 20px; }
+@media (max-width: 800px) { .two-col { grid-template-columns: 1fr; } }

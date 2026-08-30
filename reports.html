@@ -16,18 +16,20 @@
 
     <div class="card" style="margin-bottom:20px;">
       <div class="preset-btns">
-        <button type="button" class="btn btn-ghost btn-sm" data-preset="today">Өнөөдөр</button>
-        <button type="button" class="btn btn-ghost btn-sm" data-preset="week">Сүүлийн 7 хоног</button>
-        <button type="button" class="btn btn-ghost btn-sm" data-preset="month">Энэ сар</button>
+        <button type="button" class="btn btn-ghost btn-sm" data-preset="today">Өдөр (10:00 ээлж)</button>
+        <button type="button" class="btn btn-ghost btn-sm" data-preset="week">7 хоног</button>
+        <button type="button" class="btn btn-ghost btn-sm" data-preset="month">Сар</button>
+        <button type="button" class="btn btn-ghost btn-sm" data-preset="halfyear">Хагас жил</button>
+        <button type="button" class="btn btn-ghost btn-sm" data-preset="year">Жил</button>
       </div>
       <form id="hb-range-form" class="form-row" style="margin-top:10px;">
         <div class="form-group">
-          <label for="hb-from">Эхлэх огноо</label>
-          <input type="date" id="hb-from" required />
+          <label for="hb-from">Эхлэх</label>
+          <input type="datetime-local" id="hb-from" required />
         </div>
         <div class="form-group">
-          <label for="hb-to">Дуусах огноо</label>
-          <input type="date" id="hb-to" required />
+          <label for="hb-to">Дуустал</label>
+          <input type="datetime-local" id="hb-to" required />
         </div>
         <button type="submit" class="btn btn-primary">Шүүх</button>
       </form>
@@ -35,25 +37,57 @@
 
     <div class="stats-grid">
       <div class="stat-card">
-        <div class="stat-label">Нийт орлого</div>
+        <div class="stat-label">Орлого</div>
         <div class="stat-value" id="hb-stat-revenue">0₮</div>
+      </div>
+      <div class="stat-card">
+        <div class="stat-label">Зарлага</div>
+        <div class="stat-value" id="hb-stat-expense">0₮</div>
+      </div>
+      <div class="stat-card">
+        <div class="stat-label">Цэвэр ашиг</div>
+        <div class="stat-value" id="hb-stat-net">0₮</div>
       </div>
       <div class="stat-card">
         <div class="stat-label">Session тоо</div>
         <div class="stat-value" id="hb-stat-sessions">0</div>
       </div>
-      <div class="stat-card">
-        <div class="stat-label">Нийт цаг</div>
-        <div class="stat-value" id="hb-stat-hours">0 ц</div>
-      </div>
-      <div class="stat-card">
-        <div class="stat-label">Дундаж орлого/session</div>
-        <div class="stat-value" id="hb-stat-avg">0₮</div>
-      </div>
     </div>
 
     <div class="chart-wrap">
       <canvas id="hb-chart" height="90"></canvas>
+    </div>
+
+    <div class="two-col">
+      <div>
+        <div class="section-title" style="margin-top:0;">Зарлага нэмэх</div>
+        <div class="card" style="margin-bottom:20px;">
+          <form id="hb-expense-form" class="form-row">
+            <div class="form-group">
+              <label for="hb-expense-desc">Тайлбар</label>
+              <input type="text" id="hb-expense-desc" required placeholder="жишээ: цахилгааны төлбөр" />
+            </div>
+            <div class="form-group">
+              <label for="hb-expense-category">Төрөл</label>
+              <input type="text" id="hb-expense-category" placeholder="заавал биш" />
+            </div>
+            <div class="form-group">
+              <label for="hb-expense-amount">Дүн (₮)</label>
+              <input type="number" id="hb-expense-amount" min="0" step="1000" required />
+            </div>
+            <button type="submit" class="btn btn-primary">+ Нэмэх</button>
+          </form>
+        </div>
+      </div>
+      <div>
+        <div class="section-title" style="margin-top:0;">Барааны үлдэгдэл</div>
+        <table class="data-table">
+          <thead>
+            <tr><th>Бараа</th><th>Төрөл</th><th>Үлдэгдэл</th></tr>
+          </thead>
+          <tbody id="hb-stock-body"></tbody>
+        </table>
+      </div>
     </div>
 
     <div class="section-title">Ширээгээр</div>
@@ -64,10 +98,18 @@
       <tbody id="hb-by-table-body"></tbody>
     </table>
 
+    <div class="section-title">Зарлагын жагсаалт</div>
+    <table class="data-table">
+      <thead>
+        <tr><th>Огноо</th><th>Тайлбар</th><th>Төрөл</th><th>Дүн</th></tr>
+      </thead>
+      <tbody id="hb-expenses-body"></tbody>
+    </table>
+
     <div class="section-title">Session түүх</div>
     <table class="data-table">
       <thead>
-        <tr><th>Дууссан цаг</th><th>Ширээ</th><th>Үргэлжилсэн</th><th>Дүн</th></tr>
+        <tr><th>Дууссан цаг</th><th>Ширээ</th><th>Үргэлжилсэн</th><th>Цагийн төлбөр</th><th>Бараа</th><th>Нийт</th></tr>
       </thead>
       <tbody id="hb-history-body"></tbody>
     </table>

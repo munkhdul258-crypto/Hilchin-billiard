@@ -1,7 +1,8 @@
-// Орлогын тайлан, статистикийн хуудас
+// Орлогын тайлан, статистикийн хуудас (v2: зарлага, үлдэгдэл, 10 цагийн ээлж)
 
 const HB_Reports = {
   chart: null,
+  SHIFT_START_HOUR: 10, // өглөөний 10 цагт ээлж солигдоно
 
   async init() {
     const ctx = await HB_Auth.requireAuth();
@@ -12,38 +13,54 @@ const HB_Reports = {
       e.preventDefault();
       this.load();
     });
-
     document.querySelectorAll("[data-preset]").forEach((btn) => {
       btn.addEventListener("click", () => this.applyPreset(btn.dataset.preset));
     });
+    document.getElementById("hb-expense-form").addEventListener("submit", (e) => this.handleAddExpense(e));
 
+    await this.loadStock();
     this.applyPreset("today");
+  },
+
+  /** "Өдөр" гэдгийг өглөөний 10 цагаас эхлүүлж тооцно (ээлж солигдох цаг). */
+  shiftDayStart(date) {
+    const d = new Date(date);
+    if (d.getHours() < this.SHIFT_START_HOUR) d.setDate(d.getDate() - 1);
+    d.setHours(this.SHIFT_START_HOUR, 0, 0, 0);
+    return d;
   },
 
   applyPreset(preset) {
     const now = new Date();
     let from, to;
-    to = new Date(now);
-    to.setHours(23, 59, 59, 999);
 
     if (preset === "today") {
-      from = new Date(now);
-      from.setHours(0, 0, 0, 0);
+      from = this.shiftDayStart(now);
+      to = new Date(from.getTime() + 24 * 60 * 60 * 1000 - 1000);
     } else if (preset === "week") {
-      from = new Date(now);
+      from = this.shiftDayStart(now);
       from.setDate(from.getDate() - 6);
-      from.setHours(0, 0, 0, 0);
+      to = new Date();
     } else if (preset === "month") {
-      from = new Date(now.getFullYear(), now.getMonth(), 1);
+      from = new Date(now.getFullYear(), now.getMonth(), 1, this.SHIFT_START_HOUR, 0, 0);
+      to = new Date();
+    } else if (preset === "halfyear") {
+      from = new Date(now);
+      from.setMonth(from.getMonth() - 6);
+      to = new Date();
+    } else if (preset === "year") {
+      from = new Date(now.getFullYear(), 0, 1, this.SHIFT_START_HOUR, 0, 0);
+      to = new Date();
     }
 
-    document.getElementById("hb-from").value = this.toInputDate(from);
-    document.getElementById("hb-to").value = this.toInputDate(to);
+    document.getElementById("hb-from").value = this.toInputDateTime(from);
+    document.getElementById("hb-to").value = this.toInputDateTime(to);
     this.load();
   },
 
-  toInputDate(d) {
-    return d.toISOString().slice(0, 10);
+  toInputDateTime(d) {
+    const pad = (n) => String(n).padStart(2, "0");
+    return `${d.getFullYear()}-${pad(d.getMonth() + 1)}-${pad(d.getDate())}T${pad(d.getHours())}:${pad(d.getMinutes())}`;
   },
 
   async load() {
@@ -51,43 +68,66 @@ const HB_Reports = {
     const toVal = document.getElementById("hb-to").value;
     if (!fromVal || !toVal) return;
 
-    const from = new Date(fromVal + "T00:00:00");
-    const to = new Date(toVal + "T23:59:59.999");
+    const from = new Date(fromVal);
+    const to = new Date(toVal);
 
-    const { data: sessions, error } = await window.supabaseClient
-      .from("sessions")
-      .select("*, billiard_tables(name)")
-      .eq("status", "completed")
-      .gte("ended_at", from.toISOString())
-      .lte("ended_at", to.toISOString())
-      .order("ended_at", { ascending: false });
+    const [{ data: sessions, error }, { data: expenses, error: expErr }] = await Promise.all([
+      window.supabaseClient
+        .from("sessions")
+        .select("*, billiard_tables(name)")
+        .eq("status", "completed")
+        .gte("ended_at", from.toISOString())
+        .lte("ended_at", to.toISOString())
+        .order("ended_at", { ascending: false }),
+      window.supabaseClient
+        .from("expenses")
+        .select("*")
+        .gte("spent_at", from.toISOString())
+        .lte("spent_at", to.toISOString())
+        .order("spent_at", { ascending: false }),
+    ]);
 
-    if (error) {
-      alert("Тайлан ачаалахад алдаа гарлаа: " + error.message);
-      return;
-    }
+    if (error) return alert("Тайлан ачаалахад алдаа гарлаа: " + error.message);
+    if (expErr) console.error(expErr);
 
-    this.renderSummary(sessions || []);
+    this.renderSummary(sessions || [], expenses || []);
     this.renderByTable(sessions || []);
     this.renderHistory(sessions || []);
-    this.renderChart(sessions || [], from, to);
+    this.renderExpenses(expenses || []);
+    this.renderChart(sessions || [], expenses || [], from, to);
   },
 
-  renderSummary(sessions) {
+  renderSummary(sessions, expenses) {
     const totalRevenue = sessions.reduce((sum, s) => sum + Number(s.total_amount || 0), 0);
+    const totalExpense = expenses.reduce((sum, e) => sum + Number(e.amount || 0), 0);
     const totalSessions = sessions.length;
-    const totalMinutes = sessions.reduce((sum, s) => {
-      const start = new Date(s.started_at).getTime();
-      const end = new Date(s.ended_at).getTime();
-      return sum + (end - start) / 60000;
-    }, 0);
 
     document.getElementById("hb-stat-revenue").textContent = this.formatMoney(totalRevenue);
+    document.getElementById("hb-stat-expense").textContent = this.formatMoney(totalExpense);
+    document.getElementById("hb-stat-net").textContent = this.formatMoney(totalRevenue - totalExpense);
     document.getElementById("hb-stat-sessions").textContent = totalSessions;
-    document.getElementById("hb-stat-hours").textContent = (totalMinutes / 60).toFixed(1) + " ц";
-    document.getElementById("hb-stat-avg").textContent = this.formatMoney(
-      totalSessions ? totalRevenue / totalSessions : 0
-    );
+  },
+
+  async loadStock() {
+    const { data, error } = await window.supabaseClient
+      .from("products")
+      .select("*")
+      .order("quantity", { ascending: true });
+    if (error) return;
+
+    const tbody = document.getElementById("hb-stock-body");
+    tbody.innerHTML = (data || []).length
+      ? data
+          .map(
+            (p) => `
+        <tr>
+          <td>${p.name}</td>
+          <td>${p.category || "—"}</td>
+          <td>${p.quantity} ${p.unit}</td>
+        </tr>`
+          )
+          .join("")
+      : `<tr><td colspan="3" class="muted">Бараа бүртгэгдээгүй</td></tr>`;
   },
 
   renderByTable(sessions) {
@@ -103,14 +143,7 @@ const HB_Reports = {
     const tbody = document.getElementById("hb-by-table-body");
     tbody.innerHTML = rows.length
       ? rows
-          .map(
-            ([name, v]) => `
-        <tr>
-          <td>${name}</td>
-          <td>${v.count}</td>
-          <td>${this.formatMoney(v.revenue)}</td>
-        </tr>`
-          )
+          .map(([name, v]) => `<tr><td>${name}</td><td>${v.count}</td><td>${this.formatMoney(v.revenue)}</td></tr>`)
           .join("")
       : `<tr><td colspan="3" class="muted">Мэдээлэл алга</td></tr>`;
   },
@@ -128,14 +161,52 @@ const HB_Reports = {
             <td>${end.toLocaleString("mn-MN")}</td>
             <td>${(s.billiard_tables && s.billiard_tables.name) || "—"}</td>
             <td>${durationMin} мин</td>
+            <td>${this.formatMoney(s.time_amount != null ? s.time_amount : s.total_amount)}</td>
+            <td>${this.formatMoney(s.items_amount || 0)}</td>
             <td>${this.formatMoney(s.total_amount)}</td>
           </tr>`;
           })
           .join("")
-      : `<tr><td colspan="4" class="muted">Мэдээлэл алга</td></tr>`;
+      : `<tr><td colspan="6" class="muted">Мэдээлэл алга</td></tr>`;
   },
 
-  renderChart(sessions, from, to) {
+  renderExpenses(expenses) {
+    const tbody = document.getElementById("hb-expenses-body");
+    tbody.innerHTML = expenses.length
+      ? expenses
+          .map(
+            (e) => `
+        <tr>
+          <td>${new Date(e.spent_at).toLocaleString("mn-MN")}</td>
+          <td>${e.description}</td>
+          <td>${e.category || "—"}</td>
+          <td>${this.formatMoney(e.amount)}</td>
+        </tr>`
+          )
+          .join("")
+      : `<tr><td colspan="4" class="muted">Зарлага алга</td></tr>`;
+  },
+
+  async handleAddExpense(e) {
+    e.preventDefault();
+    const description = document.getElementById("hb-expense-desc").value.trim();
+    const amount = parseFloat(document.getElementById("hb-expense-amount").value);
+    const category = document.getElementById("hb-expense-category").value.trim();
+    if (!description || !amount) return;
+
+    const { error } = await window.supabaseClient.from("expenses").insert({
+      description,
+      amount,
+      category,
+      created_by: HB_Auth.currentUser.id,
+    });
+    if (error) return alert("Зарлага нэмэхэд алдаа гарлаа: " + error.message);
+
+    e.target.reset();
+    await this.load();
+  },
+
+  renderChart(sessions, expenses, from, to) {
     const canvas = document.getElementById("hb-chart");
     if (!canvas || !window.Chart) return;
 
@@ -145,11 +216,17 @@ const HB_Reports = {
       days.push(new Date(t));
     }
 
-    const totals = days.map((day) => {
+    const revByDay = days.map((day) => {
       const dayStr = day.toDateString();
       return sessions
         .filter((s) => new Date(s.ended_at).toDateString() === dayStr)
         .reduce((sum, s) => sum + Number(s.total_amount || 0), 0);
+    });
+    const expByDay = days.map((day) => {
+      const dayStr = day.toDateString();
+      return expenses
+        .filter((e) => new Date(e.spent_at).toDateString() === dayStr)
+        .reduce((sum, e) => sum + Number(e.amount || 0), 0);
     });
 
     const labels = days.map((d) => d.toLocaleDateString("mn-MN", { month: "short", day: "numeric" }));
@@ -160,26 +237,20 @@ const HB_Reports = {
       data: {
         labels,
         datasets: [
-          {
-            label: "Өдрийн орлого (₮)",
-            data: totals,
-            backgroundColor: "#2563eb",
-            borderRadius: 6,
-          },
+          { label: "Орлого (₮)", data: revByDay, backgroundColor: "#2563eb", borderRadius: 6 },
+          { label: "Зарлага (₮)", data: expByDay, backgroundColor: "#dc2626", borderRadius: 6 },
         ],
       },
       options: {
         responsive: true,
-        plugins: { legend: { display: false } },
-        scales: {
-          y: { beginAtZero: true, ticks: { callback: (v) => v.toLocaleString("mn-MN") } },
-        },
+        plugins: { legend: { display: true } },
+        scales: { y: { beginAtZero: true, ticks: { callback: (v) => v.toLocaleString("mn-MN") } } },
       },
     });
   },
 
   formatMoney(n) {
-    return Math.round(n).toLocaleString("mn-MN") + "₮";
+    return Math.round(n || 0).toLocaleString("mn-MN") + "₮";
   },
 };
 

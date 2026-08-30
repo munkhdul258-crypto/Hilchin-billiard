@@ -1,0 +1,88 @@
+<!doctype html>
+<html lang="mn">
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+  <title>Бараа материал — Hilchin Billiard</title>
+  <link rel="stylesheet" href="style.css" />
+</head>
+<body>
+  <div id="hb-navbar"></div>
+
+  <div class="page">
+    <div class="page-header">
+      <h1>Бараа материал</h1>
+    </div>
+
+    <div id="hb-error" class="error-box hidden"></div>
+
+    <div class="two-col">
+      <div>
+        <div class="section-title" style="margin-top:0;">Нөөцөд бараа нэмэх хүсэлт</div>
+        <div class="card">
+          <form id="hb-stock-form">
+            <div class="form-group" style="margin-bottom:10px;">
+              <label for="hb-stock-name">Барааны нэр</label>
+              <input type="text" id="hb-stock-name" required placeholder="жишээ: Кока-кола 0.5л" />
+            </div>
+            <div class="form-row" style="margin-bottom:10px;">
+              <div class="form-group">
+                <label for="hb-stock-category">Төрөл</label>
+                <input type="text" id="hb-stock-category" placeholder="ундаа / зууш" />
+              </div>
+              <div class="form-group">
+                <label for="hb-stock-unit">Нэгж</label>
+                <input type="text" id="hb-stock-unit" placeholder="ширхэг" />
+              </div>
+            </div>
+            <div class="form-row" style="margin-bottom:10px;">
+              <div class="form-group">
+                <label for="hb-stock-qty">Тоо ширхэг</label>
+                <input type="number" id="hb-stock-qty" min="1" step="1" required />
+              </div>
+              <div class="form-group">
+                <label for="hb-stock-price">Нэгжийн үнэ (₮)</label>
+                <input type="number" id="hb-stock-price" min="0" step="100" />
+              </div>
+            </div>
+            <div class="form-group" style="margin-bottom:10px;">
+              <label for="hb-stock-note">Тэмдэглэл</label>
+              <input type="text" id="hb-stock-note" placeholder="заавал биш" />
+            </div>
+            <div class="form-group" style="margin-bottom:14px;">
+              <label for="hb-receipt-file">Баримт/зураг хавсаргах</label>
+              <input type="file" id="hb-receipt-file" accept="image/*" />
+              <img id="hb-receipt-preview" class="upload-preview hidden" />
+            </div>
+            <button type="submit" class="btn btn-primary btn-full">Админд хүсэлт илгээх</button>
+          </form>
+        </div>
+      </div>
+
+      <div>
+        <div class="section-title" style="margin-top:0;">Одоогийн нөөц</div>
+        <table class="data-table">
+          <thead>
+            <tr><th>Бараа</th><th>Төрөл</th><th>Үлдэгдэл</th><th>Үнэ</th></tr>
+          </thead>
+          <tbody id="hb-products-body"></tbody>
+        </table>
+      </div>
+    </div>
+
+    <div class="section-title">Хүсэлтийн түүх</div>
+    <table class="data-table">
+      <thead>
+        <tr><th>Огноо</th><th>Бараа</th><th>Тоо</th><th>Үнэ</th><th>Оруулсан</th><th>Төлөв</th><th></th></tr>
+      </thead>
+      <tbody id="hb-requests-body"></tbody>
+    </table>
+  </div>
+
+  <script src="https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2/dist/umd/supabase.min.js"></script>
+  <script src="config.js"></script>
+  <script src="supabaseClient.js"></script>
+  <script src="auth.js"></script>
+  <script src="inventory.js"></script>
+</body>
+</html>

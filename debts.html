@@ -1,0 +1,74 @@
+<!doctype html>
+<html lang="mn">
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+  <title>Зээл — Hilchin Billiard</title>
+  <link rel="stylesheet" href="style.css" />
+</head>
+<body>
+  <div id="hb-navbar"></div>
+
+  <div class="page">
+    <div class="page-header">
+      <h1>Зээлийн бүртгэл</h1>
+    </div>
+
+    <div id="hb-error" class="error-box hidden"></div>
+
+    <div class="stats-grid">
+      <div class="stat-card">
+        <div class="stat-label">Төлөгдөөгүй нийт дүн</div>
+        <div class="stat-value" id="hb-stat-unpaid">0₮</div>
+      </div>
+      <div class="stat-card">
+        <div class="stat-label">Хугацаа хэтэрсэн</div>
+        <div class="stat-value" id="hb-stat-overdue">0</div>
+      </div>
+      <div class="stat-card">
+        <div class="stat-label">Нийт зээлдэгч</div>
+        <div class="stat-value" id="hb-stat-count">0</div>
+      </div>
+    </div>
+
+    <div class="card" style="margin-bottom:20px;">
+      <form id="hb-debt-form" class="form-row">
+        <div class="form-group">
+          <label for="hb-debt-name">Харилцагчийн нэр</label>
+          <input type="text" id="hb-debt-name" required placeholder="Бат" />
+        </div>
+        <div class="form-group">
+          <label for="hb-debt-phone">Утас</label>
+          <input type="text" id="hb-debt-phone" placeholder="99112233" />
+        </div>
+        <div class="form-group">
+          <label for="hb-debt-amount">Дүн (₮)</label>
+          <input type="number" id="hb-debt-amount" min="0" step="1000" required />
+        </div>
+        <div class="form-group">
+          <label for="hb-debt-due">Төлөх огноо</label>
+          <input type="date" id="hb-debt-due" />
+        </div>
+        <div class="form-group">
+          <label for="hb-debt-note">Тэмдэглэл</label>
+          <input type="text" id="hb-debt-note" placeholder="заавал биш" />
+        </div>
+        <button type="submit" class="btn btn-primary">+ Бүртгэх</button>
+      </form>
+    </div>
+
+    <table class="data-table">
+      <thead>
+        <tr><th>Харилцагч</th><th>Дүн</th><th>Төлөх огноо</th><th>Тэмдэглэл</th><th>Төлөв</th><th></th></tr>
+      </thead>
+      <tbody id="hb-debts-body"></tbody>
+    </table>
+  </div>
+
+  <script src="https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2/dist/umd/supabase.min.js"></script>
+  <script src="config.js"></script>
+  <script src="supabaseClient.js"></script>
+  <script src="auth.js"></script>
+  <script src="debts.js"></script>
+</body>
+</html>
