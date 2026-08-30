@@ -6,6 +6,7 @@
 // аюулгүй (өгөгдлийг Row Level Security хамгаална).
 // =========================================================
 window.SUPABASE_CONFIG = {
-  url: "https://YOUR-PROJECT-REF.supabase.co",
-  anonKey: "YOUR-ANON-PUBLIC-KEY",
+  url: "https://yapumhhxrtnzwvpbforq.supabase.co",
+  anonKey:
+    "eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpc3MiOiJzdXBhYmFzZSIsInJlZiI6InlhcHVtaGh4cnRuend2cGJmb3JxIiwicm9sZSI6ImFub24iLCJpYXQiOjE3ODgwNTg0MzcsImV4cCI6MjEwMzYzNDQzN30.szb4_F3Px3aTmHgtHcjcMbo1KVFff0baMqVTRpZkFFM",
 };

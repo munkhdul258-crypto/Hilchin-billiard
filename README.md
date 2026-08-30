@@ -8,17 +8,20 @@ Build алхамгүй (Next.js биш) — цэвэр HTML/CSS/JavaScript + [Su
 
 ## Файлын бүтэц
 
+Бүх файл ганц түвшинд (folder ашиглаагүй) — GitHub-ийн веб upload/edit
+цонхонд шууд ажиллахад амархан байхын тулд:
+
 - `index.html` — Ширээнүүдийн самбар (эхлүүлэх/дуусгах, live timer)
 - `login.html` — Ажилтны нэвтрэх хуудас
 - `reports.html` — Орлогын тайлан, статистик, график
 - `staff.html` — Ажилтны эрх удирдах (зөвхөн admin)
-- `js/config.js` — Supabase URL/key тохиргоо (**эхлээд бөглөнө үү**)
-- `supabase/schema.sql` — Өгөгдлийн сангийн бүтэц (Supabase дээр ажиллуулна)
+- `config.js` — Supabase URL/key тохиргоо (**эхлээд бөглөнө үү**)
+- `schema.sql` — Өгөгдлийн сангийн бүтэц (Supabase дээр ажиллуулна)
 
 ## 1) Supabase тохируулах
 
 1. [supabase.com](https://supabase.com) дээр шинэ project үүсгэ.
-2. **SQL Editor** руу орж `supabase/schema.sql` файлын агуулгыг бүхэлд нь хуулж ажиллуул.
+2. **SQL Editor** руу орж `schema.sql` файлын агуулгыг бүхэлд нь хуулж ажиллуул.
 3. **Authentication → Providers**-с Email provider идэвхтэй эсэхийг шалга.
    "Confirm email"-ийг унтраавал (Settings → Auth) шинэ ажилтан шууд нэвтэрч чадна.
 4. **Authentication → Users → Add user** дарж эхний (админ) ажилтныгаа имэйл +
@@ -29,7 +32,7 @@ Build алхамгүй (Next.js биш) — цэвэр HTML/CSS/JavaScript + [Su
      `admin` болгож солино (эхний удаад л шаардлагатай, дараа нь /staff.html-ээс
      бусад ажилтныг удирдаж болно).
 6. **Project Settings → API** хэсгээс `Project URL` болон `anon public` key-г
-   аваад `js/config.js` файлд оруул.
+   аваад `config.js` файлд оруул.
 
 ## 2) GitHub
 
@@ -51,10 +54,10 @@ git push -u origin main
    output directory нь root (`.`) байна. Vercel ихэвчлэн үүнийг автоматаар
    зөв тааж, нэмэлт тохиргоо шаардахгүй.
 4. **Deploy** дар. Хэдхэн секундэд амьд URL гарна.
-5. Дараа нь `js/config.js`-ийг өөрчлөх бүрдээ GitHub рүү push хийхэд Vercel
+5. Дараа нь `config.js`-ийг өөрчлөх бүрдээ GitHub рүү push хийхэд Vercel
    автоматаар дахин deploy хийнэ.
 
-> Санамж: `js/config.js` дахь Supabase "anon public" key нь клиент код дотор
+> Санамж: `config.js` дахь Supabase "anon public" key нь клиент код дотор
 > ил гардаг ч энэ хэвийн зүйл — жинхэнэ хамгаалалт нь Supabase-ийн Row Level
 > Security (`supabase/schema.sql` дотор тохируулсан) дээр байгаа. Service role
 > key-г ХЭЗЭЭ Ч клиент код дотор бүү оруул.
