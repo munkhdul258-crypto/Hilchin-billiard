@@ -67,16 +67,17 @@ const HB_Auth = {
 
     el.innerHTML = `
       <div class="nav-inner">
-        <div class="nav-brand"><img src="logo.png?v=3" alt="Хилчин Биллиард" class="nav-logo" /> Хилчин Биллиард</div>
+        <div class="nav-brand"><img src="logo.png?v=4" alt="Хилчин Биллиард" class="nav-logo" /> Хилчин Биллиард</div>
         <nav class="nav-links">
           ${link("index.html", "Ширээ", "tables")}
           ${link("inventory.html", "Бараа материал", "inventory")}
           ${link("debts.html", "Зээл", "debts")}
+          ${link("shift.html", "Ээлж", "shift")}
           ${link("reports.html", "Тайлан", "reports")}
           ${isAdmin ? link("staff.html", "Ажилтан", "staff") : ""}
         </nav>
         <div class="nav-user">
-          ${isAdmin ? `<div class="nav-bell-wrap"><button id="hb-bell-btn" class="nav-bell">🔔<span id="hb-bell-dot" class="nav-bell-dot hidden">0</span></button><div id="hb-bell-panel" class="nav-bell-panel hidden"></div></div>` : ""}
+          <div class="nav-bell-wrap"><button id="hb-bell-btn" class="nav-bell">🔔<span id="hb-bell-dot" class="nav-bell-dot hidden">0</span></button><div id="hb-bell-panel" class="nav-bell-panel hidden"></div></div>
           <span class="nav-user-name">${name}${isAdmin ? " · admin" : ""}</span>
           <button id="hb-logout-btn" class="btn btn-ghost btn-sm">Гарах</button>
         </div>
@@ -85,23 +86,41 @@ const HB_Auth = {
 
     document.getElementById("hb-logout-btn").addEventListener("click", () => this.signOut());
 
-    if (isAdmin) this.initBell();
+    this.initBell(isAdmin);
   },
 
-  /** Admin-д зориулсан bell: хүлээгдэж буй барааны хүсэлт + хугацаа хэтэрсэн зээл. */
-  async initBell() {
+  /**
+   * Bell: бүх ажилтанд admin-ийн илгээсэн мэдэгдэл харагдана.
+   * Admin-д нэмээд хүлээгдэж буй барааны хүсэлт + хугацаа хэтэрсэн зээл харагдана.
+   */
+  async initBell(isAdmin) {
     const refresh = async () => {
       const todayStr = new Date().toISOString().slice(0, 10);
-      const [{ data: pendingStock }, { data: overdueDebts }] = await Promise.all([
-        window.supabaseClient.from("stock_requests").select("id, product_name").eq("status", "pending"),
+      const queries = [
         window.supabaseClient
-          .from("debts")
-          .select("id, customer_name, due_date")
-          .eq("status", "unpaid")
-          .lt("due_date", todayStr),
-      ]);
+          .from("announcements")
+          .select("id, message, created_at")
+          .eq("active", true)
+          .order("created_at", { ascending: false })
+          .limit(10),
+      ];
+      if (isAdmin) {
+        queries.push(
+          window.supabaseClient.from("stock_requests").select("id, product_name").eq("status", "pending"),
+          window.supabaseClient
+            .from("debts")
+            .select("id, customer_name, due_date")
+            .eq("status", "unpaid")
+            .lt("due_date", todayStr)
+        );
+      }
 
-      const count = (pendingStock || []).length + (overdueDebts || []).length;
+      const results = await Promise.all(queries);
+      const announcements = results[0].data || [];
+      const pendingStock = isAdmin ? results[1].data || [] : [];
+      const overdueDebts = isAdmin ? results[2].data || [] : [];
+
+      const count = announcements.length + pendingStock.length + overdueDebts.length;
       const dot = document.getElementById("hb-bell-dot");
       const panel = document.getElementById("hb-bell-panel");
       if (!dot || !panel) return;
@@ -114,10 +133,11 @@ const HB_Auth = {
       }
 
       const items = [];
-      (pendingStock || []).forEach((r) =>
+      announcements.forEach((a) => items.push(`<div class="bell-item">📢 ${a.message}</div>`));
+      pendingStock.forEach((r) =>
         items.push(`<div class="bell-item">📦 <a href="inventory.html">${r.product_name}</a> — хүсэлт хүлээгдэж байна</div>`)
       );
-      (overdueDebts || []).forEach((d) =>
+      overdueDebts.forEach((d) =>
         items.push(`<div class="bell-item">⏰ <a href="debts.html">${d.customer_name}</a> — зээлийн хугацаа хэтэрсэн</div>`)
       );
       panel.innerHTML = items.length
@@ -140,6 +160,7 @@ const HB_Auth = {
       .channel("hb-bell")
       .on("postgres_changes", { event: "*", schema: "public", table: "stock_requests" }, refresh)
       .on("postgres_changes", { event: "*", schema: "public", table: "debts" }, refresh)
+      .on("postgres_changes", { event: "*", schema: "public", table: "announcements" }, refresh)
       .subscribe();
   },
 };

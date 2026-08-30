@@ -1,0 +1,80 @@
+<!doctype html>
+<html lang="mn">
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+  <title>Ээлж — Хилчин Биллиард</title>
+  <link rel="stylesheet" href="style.css?v=4" />
+</head>
+<body>
+  <div id="hb-navbar"></div>
+
+  <div class="page">
+    <div class="page-header">
+      <h1>Ээлж хүлээлцэх</h1>
+    </div>
+
+    <p class="muted" style="margin-bottom:18px;">
+      Энэ ээлжийн (өглөөний 10:00 цагаас хойш) орлого, зарлага, барааны үлдэгдлийг шалгаад
+      дараагийн ажилтанд ээлжээ хүлээлгэн өгөхийн өмнө "Ээлж хаах" товч дарж баталгаажуулна.
+    </p>
+
+    <div class="stats-grid">
+      <div class="stat-card">
+        <div class="stat-label">Энэ ээлжийн орлого</div>
+        <div class="stat-value" id="hb-shift-revenue">0₮</div>
+      </div>
+      <div class="stat-card">
+        <div class="stat-label">Зарлага</div>
+        <div class="stat-value" id="hb-shift-expense">0₮</div>
+      </div>
+      <div class="stat-card">
+        <div class="stat-label">Цэвэр</div>
+        <div class="stat-value" id="hb-shift-net">0₮</div>
+      </div>
+      <div class="stat-card">
+        <div class="stat-label">Идэвхтэй ширээ</div>
+        <div class="stat-value" id="hb-shift-active">0</div>
+      </div>
+    </div>
+
+    <div class="two-col">
+      <div>
+        <div class="section-title" style="margin-top:0;">Ээлж хаах</div>
+        <div class="card">
+          <form id="hb-shift-form">
+            <div class="form-group" style="margin-bottom:14px;">
+              <label for="hb-shift-note">Тэмдэглэл (бэлэн мөнгө, дутагдал гэх мэт)</label>
+              <textarea id="hb-shift-note" rows="3" placeholder="жишээ: касс дэх бэлэн мөнгө 350,000₮, бүгд тэнцсэн" style="border:1px solid var(--border); border-radius:9px; padding:10px 12px; background:var(--surface-2); color:var(--text); font-family:inherit; font-size:0.92rem; resize:vertical;"></textarea>
+            </div>
+            <button type="submit" class="btn btn-primary btn-full">Ээлж хаах ба хүлээлцэх</button>
+          </form>
+        </div>
+      </div>
+      <div>
+        <div class="section-title" style="margin-top:0;">Одоогийн барааны үлдэгдэл</div>
+        <table class="data-table">
+          <thead>
+            <tr><th>Бараа</th><th>Үлдэгдэл</th></tr>
+          </thead>
+          <tbody id="hb-shift-stock-body"></tbody>
+        </table>
+      </div>
+    </div>
+
+    <div class="section-title">Ээлж хүлээлцсэн түүх</div>
+    <table class="data-table">
+      <thead>
+        <tr><th>Огноо</th><th>Хаасан ажилтан</th><th>Орлого</th><th>Зарлага</th><th>Цэвэр</th><th>Тэмдэглэл</th></tr>
+      </thead>
+      <tbody id="hb-shift-history-body"></tbody>
+    </table>
+  </div>
+
+  <script src="https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2/dist/umd/supabase.min.js"></script>
+  <script src="config.js?v=4"></script>
+  <script src="supabaseClient.js?v=4"></script>
+  <script src="auth.js?v=4"></script>
+  <script src="shift.js?v=4"></script>
+</body>
+</html>

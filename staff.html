@@ -4,7 +4,7 @@
   <meta charset="UTF-8" />
   <meta name="viewport" content="width=device-width, initial-scale=1.0" />
   <title>Ажилтан — Хилчин Биллиард</title>
-  <link rel="stylesheet" href="style.css?v=3" />
+  <link rel="stylesheet" href="style.css?v=4" />
 </head>
 <body>
   <div id="hb-navbar"></div>
@@ -19,18 +19,36 @@
       Нэмсний дараа тэд энд харагдаж, эрхийг нь энд солиход хангалттай.
     </p>
 
-    <table class="data-table">
+    <table class="data-table" style="margin-bottom:30px;">
       <thead>
         <tr><th>Нэр</th><th>Имэйл</th><th>Эрх</th><th>Бүртгүүлсэн</th></tr>
       </thead>
       <tbody id="hb-staff-body"></tbody>
     </table>
+
+    <div class="section-title" style="margin-top:0;">Ажилтнууд руу мэдэгдэл илгээх</div>
+    <div class="card" style="margin-bottom:20px;">
+      <form id="hb-announce-form" class="form-row">
+        <div class="form-group" style="flex:1; min-width:220px;">
+          <label for="hb-announce-text">Мэдэгдэл</label>
+          <input type="text" id="hb-announce-text" required placeholder="жишээ: маргааш 10 цагт бүх ажилтан ирнэ үү" />
+        </div>
+        <button type="submit" class="btn btn-primary">📢 Илгээх</button>
+      </form>
+    </div>
+
+    <table class="data-table">
+      <thead>
+        <tr><th>Мэдэгдэл</th><th>Огноо</th><th>Төлөв</th><th></th></tr>
+      </thead>
+      <tbody id="hb-announce-body"></tbody>
+    </table>
   </div>
 
   <script src="https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2/dist/umd/supabase.min.js"></script>
-  <script src="config.js?v=3"></script>
-  <script src="supabaseClient.js?v=3"></script>
-  <script src="auth.js?v=3"></script>
-  <script src="staff.js?v=3"></script>
+  <script src="config.js?v=4"></script>
+  <script src="supabaseClient.js?v=4"></script>
+  <script src="auth.js?v=4"></script>
+  <script src="staff.js?v=4"></script>
 </body>
 </html>
