@@ -4,7 +4,7 @@
   <meta charset="UTF-8" />
   <meta name="viewport" content="width=device-width, initial-scale=1.0" />
   <title>Ээлж — Хилчин Биллиард</title>
-  <link rel="stylesheet" href="style.css?v=5" />
+  <link rel="stylesheet" href="style.css?v=7" />
 </head>
 <body>
   <div id="hb-navbar"></div>
@@ -14,10 +14,22 @@
       <h1>Ээлж хүлээлцэх</h1>
     </div>
 
-    <p class="muted" style="margin-bottom:18px;">
-      Энэ ээлжийн (өглөөний 10:00 цагаас хойш) орлого, зарлага, барааны үлдэгдлийг шалгаад
-      дараагийн ажилтанд ээлжээ хүлээлгэн өгөхийн өмнө "Ээлж хаах" товч дарж баталгаажуулна.
+    <p class="muted" style="margin-bottom:6px;">
+      Энэ ээлжийн орлого, зарлага, барааны үлдэгдлийг шалгаад дараагийн ажилтанд ээлжээ
+      хүлээлгэн өгөхийн өмнө "Ээлж хаах" товч дарж баталгаажуулна.
     </p>
+    <p class="muted" id="hb-shift-range-label" style="margin-bottom:18px; font-size:0.82rem;"></p>
+
+    <div id="hb-shift-hour-wrap" class="card hidden" style="margin-bottom:20px; display:flex; align-items:flex-end; gap:14px; flex-wrap:wrap;">
+      <div class="form-group">
+        <label for="hb-shift-hour-input">Ээлж солигдох цаг (0-23)</label>
+        <input type="number" id="hb-shift-hour-input" min="0" max="23" step="1" style="width:100px;" />
+      </div>
+      <form id="hb-shift-hour-form">
+        <button type="submit" class="btn btn-ghost">Хадгалах</button>
+      </form>
+      <span class="muted" style="font-size:0.82rem;">Одоогийн тохиргоо: <strong id="hb-shift-hour-label" style="color:var(--primary);">10:00</strong></span>
+    </div>
 
     <div class="stats-grid">
       <div class="stat-card">
@@ -35,6 +47,21 @@
       <div class="stat-card">
         <div class="stat-label">Идэвхтэй ширээ</div>
         <div class="stat-value" id="hb-shift-active">0</div>
+      </div>
+    </div>
+
+    <div class="stats-grid">
+      <div class="stat-card">
+        <div class="stat-label">💵 Бэлэн мөнгө</div>
+        <div class="stat-value" id="hb-shift-cash">0₮</div>
+      </div>
+      <div class="stat-card">
+        <div class="stat-label">🏦 Дансны шилжүүлэг</div>
+        <div class="stat-value" id="hb-shift-transfer">0₮</div>
+      </div>
+      <div class="stat-card">
+        <div class="stat-label">💳 POS / карт</div>
+        <div class="stat-value" id="hb-shift-pos">0₮</div>
       </div>
     </div>
 
@@ -72,9 +99,9 @@
   </div>
 
   <script src="https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2/dist/umd/supabase.min.js"></script>
-  <script src="config.js?v=5"></script>
-  <script src="supabaseClient.js?v=5"></script>
-  <script src="auth.js?v=5"></script>
-  <script src="shift.js?v=5"></script>
+  <script src="config.js?v=7"></script>
+  <script src="supabaseClient.js?v=7"></script>
+  <script src="auth.js?v=7"></script>
+  <script src="shift.js?v=7"></script>
 </body>
 </html>
