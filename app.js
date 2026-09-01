@@ -7,18 +7,28 @@ const HB_App = {
   sessionItems: {}, // session_id -> [items]
   products: [],
   tickInterval: null,
-  openItemFormFor: null, // table_id хэрэв "бараа нэмэх" form нээлттэй бол
 
   async init() {
     const ctx = await HB_Auth.requireAuth();
     if (!ctx) return;
     HB_Auth.renderNavbar("tables");
 
-    if (ctx.profile && ctx.profile.role === "admin") {
+    this.isAdmin = !!(ctx.profile && ctx.profile.role === "admin");
+
+    if (this.isAdmin) {
       document.getElementById("hb-add-table-wrap").classList.remove("hidden");
       document
         .getElementById("hb-add-table-form")
         .addEventListener("submit", (e) => this.handleAddTable(e));
+    }
+
+    const overlay = document.getElementById("hb-modal-overlay");
+    const closeBtn = document.getElementById("hb-modal-close");
+    if (closeBtn) closeBtn.addEventListener("click", () => this.closeModal());
+    if (overlay) {
+      overlay.addEventListener("click", (e) => {
+        if (e.target === overlay) this.closeModal();
+      });
     }
 
     await this.loadProducts();
@@ -115,24 +125,19 @@ const HB_App = {
         this.startSession(tableId, rate, hours);
       });
     });
-    grid.querySelectorAll('[data-action="stop"]').forEach((btn) => {
-      btn.addEventListener("click", () =>
-        this.stopSession(btn.dataset.sessionId, btn.dataset.tableId)
-      );
+    grid.querySelectorAll('[data-action="open-add-item"]').forEach((btn) => {
+      btn.addEventListener("click", () => this.openAddItemModal(btn.dataset.tableId, btn.dataset.sessionId));
     });
-    grid.querySelectorAll('[data-action="toggle-item-form"]').forEach((btn) => {
-      btn.addEventListener("click", () => {
-        this.openItemFormFor = this.openItemFormFor === btn.dataset.tableId ? null : btn.dataset.tableId;
-        this.render();
-      });
-    });
-    grid.querySelectorAll('[data-action="add-item"]').forEach((btn) => {
-      btn.addEventListener("click", () => this.handleAddItem(btn.dataset.sessionId, btn.dataset.tableId));
+    grid.querySelectorAll('[data-action="open-close"]').forEach((btn) => {
+      btn.addEventListener("click", () => this.openCloseModal(btn.dataset.tableId, btn.dataset.sessionId));
     });
     grid.querySelectorAll('[data-action="remove-item"]').forEach((btn) => {
       btn.addEventListener("click", () =>
         this.removeItem(btn.dataset.itemId, btn.dataset.tableId)
       );
+    });
+    grid.querySelectorAll('[data-action="delete-table"]').forEach((btn) => {
+      btn.addEventListener("click", () => this.deleteTable(btn.dataset.tableId, btn.dataset.tableName));
     });
 
     this.renderTimers();
@@ -153,6 +158,11 @@ const HB_App = {
         <button class="btn btn-primary" data-action="start" data-table-id="${t.id}" data-rate="${t.hourly_rate}">
           Эхлүүлэх
         </button>
+        ${
+          this.isAdmin
+            ? `<button type="button" class="btn btn-ghost btn-sm" data-action="delete-table" data-table-id="${t.id}" data-table-name="${t.name}">🗑 Ширээ устгах</button>`
+            : ""
+        }
       </div>
     `;
   },
@@ -160,11 +170,6 @@ const HB_App = {
   renderOccupiedCard(t, session) {
     const items = this.sessionItems[session.id] || [];
     const itemsTotal = items.reduce((sum, it) => sum + Number(it.line_total || 0), 0);
-    const showForm = this.openItemFormFor === t.id;
-
-    const productOptions = this.products
-      .map((p) => `<option value="${p.id}" data-price="${p.unit_price}">${p.name} (${this.formatMoney(p.unit_price)})</option>`)
-      .join("");
 
     return `
       <div class="table-card occupied" data-table-id="${t.id}">
@@ -197,31 +202,87 @@ const HB_App = {
               </div>`
             : ""
         }
-        ${
-          showForm
-            ? `<div class="add-item-form">
-                <select id="hb-product-${t.id}">
-                  <option value="">Бараа сонгох...</option>
-                  ${productOptions}
-                </select>
-                <input type="number" id="hb-qty-${t.id}" min="1" step="1" value="1" style="width:70px" />
-                <button type="button" class="btn btn-primary btn-sm" data-action="add-item" data-session-id="${session.id}" data-table-id="${t.id}">Нэмэх</button>
-              </div>`
-            : `<button type="button" class="btn btn-ghost btn-sm" data-action="toggle-item-form" data-table-id="${t.id}">+ Бараа нэмэх</button>`
-        }
-        <div class="form-group">
-          <label>Төлбөрийн хэлбэр</label>
-          <select id="hb-payment-${t.id}">
-            <option value="cash">Бэлэн мөнгө</option>
-            <option value="transfer">Дансны шилжүүлэг</option>
-            <option value="pos">POS / карт</option>
-          </select>
-        </div>
-        <button class="btn btn-danger" data-action="stop" data-session-id="${session.id}" data-table-id="${t.id}">
+        <button type="button" class="btn btn-ghost btn-sm" data-action="open-add-item" data-table-id="${t.id}" data-session-id="${session.id}">+ Бараа нэмэх</button>
+        <button class="btn btn-danger" data-action="open-close" data-session-id="${session.id}" data-table-id="${t.id}">
           Дуусгах
         </button>
       </div>
     `;
+  },
+
+  /* ---------- Popup (modal) ---------- */
+
+  openModal(innerHtml) {
+    const overlay = document.getElementById("hb-modal-overlay");
+    const body = document.getElementById("hb-modal-body");
+    if (!overlay || !body) return;
+    body.innerHTML = innerHtml;
+    overlay.classList.remove("hidden");
+  },
+
+  closeModal() {
+    const overlay = document.getElementById("hb-modal-overlay");
+    if (overlay) overlay.classList.add("hidden");
+  },
+
+  openAddItemModal(tableId, sessionId) {
+    const table = this.tables.find((tb) => tb.id === tableId);
+    const productOptions = this.products
+      .map((p) => `<option value="${p.id}">${p.name} (${this.formatMoney(p.unit_price)}) — үлдэгдэл: ${p.quantity} ${p.unit}</option>`)
+      .join("");
+
+    this.openModal(`
+      <div class="modal-title">${table ? table.name : ""} — Бараа нэмэх</div>
+      <div class="form-group" style="margin-bottom:14px;">
+        <label>Бараа</label>
+        <select id="hb-modal-product">
+          <option value="">Бараа сонгох...</option>
+          ${productOptions}
+        </select>
+      </div>
+      <div class="form-group" style="margin-bottom:18px;">
+        <label>Тоо ширхэг</label>
+        <input type="number" id="hb-modal-qty" min="1" step="1" value="1" />
+      </div>
+      <button type="button" class="btn btn-primary btn-full" id="hb-modal-add-btn">+ Нэмэх</button>
+    `);
+
+    document.getElementById("hb-modal-add-btn").addEventListener("click", () => this.handleAddItem(sessionId, tableId));
+  },
+
+  openCloseModal(tableId, sessionId) {
+    const table = this.tables.find((tb) => tb.id === tableId);
+    const session = this.activeSessions[tableId];
+    if (!table || !session) return;
+
+    const items = this.sessionItems[sessionId] || [];
+    const itemsAmount = items.reduce((sum, it) => sum + Number(it.line_total || 0), 0);
+    const elapsedMs = Date.now() - new Date(session.started_at).getTime();
+    const elapsedHours = elapsedMs / 1000 / 60 / 60;
+    const timeAmount = Math.round(Math.max(0, elapsedHours * session.hourly_rate));
+    const total = timeAmount + itemsAmount;
+
+    this.openModal(`
+      <div class="modal-title">${table.name} — Тооцоо дуусгах</div>
+      <div class="modal-summary-row"><span>Тоглосон хугацаа</span><span>${this.formatDuration(elapsedMs)}</span></div>
+      <div class="modal-summary-row"><span>Цагийн төлбөр</span><span>${this.formatMoney(timeAmount)}</span></div>
+      <div class="modal-summary-row"><span>Бараа (${items.length})</span><span>${this.formatMoney(itemsAmount)}</span></div>
+      <div class="modal-summary-row total"><span>Нийт дүн</span><span>${this.formatMoney(total)}</span></div>
+      <div class="form-group" style="margin: 16px 0 18px;">
+        <label>Төлбөрийн хэлбэр</label>
+        <select id="hb-modal-payment">
+          <option value="cash">Бэлэн мөнгө</option>
+          <option value="transfer">Дансны шилжүүлэг</option>
+          <option value="pos">POS / карт</option>
+        </select>
+      </div>
+      <button type="button" class="btn btn-danger btn-full" id="hb-modal-close-btn">Дуусгаж баталгаажуулах</button>
+    `);
+
+    document.getElementById("hb-modal-close-btn").addEventListener("click", () => {
+      const paymentMethod = document.getElementById("hb-modal-payment").value;
+      this.stopSession(sessionId, tableId, paymentMethod);
+    });
   },
 
   renderTimers() {
@@ -256,8 +317,8 @@ const HB_App = {
   },
 
   async handleAddItem(sessionId, tableId) {
-    const select = document.getElementById(`hb-product-${tableId}`);
-    const qtyInput = document.getElementById(`hb-qty-${tableId}`);
+    const select = document.getElementById("hb-modal-product");
+    const qtyInput = document.getElementById("hb-modal-qty");
     const productId = select.value;
     const qty = parseFloat(qtyInput.value) || 1;
     if (!productId) return;
@@ -290,7 +351,7 @@ const HB_App = {
       .update({ quantity: Math.max(0, Number(product.quantity) - qty), updated_at: new Date().toISOString() })
       .eq("id", product.id);
 
-    this.openItemFormFor = null;
+    this.closeModal();
     await this.loadProducts();
     await this.loadTables();
   },
@@ -323,12 +384,11 @@ const HB_App = {
     await this.loadTables();
   },
 
-  async stopSession(sessionId, tableId) {
+  async stopSession(sessionId, tableId, paymentMethod) {
     const session = this.activeSessions[tableId];
     if (!session) return;
 
-    const paymentSelect = document.getElementById(`hb-payment-${tableId}`);
-    const paymentMethod = paymentSelect ? paymentSelect.value : "cash";
+    paymentMethod = paymentMethod || "cash";
 
     const startedAt = new Date(session.started_at).getTime();
     const endedAt = Date.now();
@@ -355,6 +415,18 @@ const HB_App = {
     }
 
     await window.supabaseClient.from("billiard_tables").update({ status: "available" }).eq("id", tableId);
+    this.closeModal();
+    await this.loadTables();
+  },
+
+  async deleteTable(tableId, tableName) {
+    if (!confirm(`"${tableName}" ширээг устгах уу? Энэ үйлдлийг буцаах боломжгүй.`)) return;
+
+    const { error } = await window.supabaseClient.from("billiard_tables").delete().eq("id", tableId);
+    if (error) {
+      this.showError("Ширээ устгахад алдаа гарлаа: " + error.message);
+      return;
+    }
     await this.loadTables();
   },
 

@@ -1,16 +1,58 @@
-// Ээлж хүлээлцэх хуудас: 10:00 цагийн ээлжийн орлого/зарлага/үлдэгдлийг
-// нэгтгэж харуулаад, "Ээлж хаах" үед shift_handovers-т бүртгэнэ.
+// Ээлж хүлээлцэх хуудас: тохируулсан цагийн ээлжийн орлого/зарлага/үлдэгдлийг
+// (бэлэн/дансаар задлан) нэгтгэж харуулаад, "Ээлж хаах" үед shift_handovers-т бүртгэнэ.
 
 const HB_Shift = {
-  SHIFT_START_HOUR: 10,
+  SHIFT_START_HOUR: 10, // settings хүснэгтээс ачаалагдмагц дарагдана
+  PAYMENT_LABELS: { cash: "Бэлэн мөнгө", transfer: "Дансны шилжүүлэг", pos: "POS / карт" },
 
   async init() {
     const ctx = await HB_Auth.requireAuth();
     if (!ctx) return;
     HB_Auth.renderNavbar("shift");
 
+    this.isAdmin = ctx.profile && ctx.profile.role === "admin";
+
     document.getElementById("hb-shift-form").addEventListener("submit", (e) => this.handleClose(e));
 
+    if (this.isAdmin) {
+      document.getElementById("hb-shift-hour-wrap").classList.remove("hidden");
+      document.getElementById("hb-shift-hour-form").addEventListener("submit", (e) => this.handleSaveHour(e));
+    }
+
+    await this.loadShiftHour();
+    await this.load();
+  },
+
+  async loadShiftHour() {
+    const { data } = await window.supabaseClient
+      .from("settings")
+      .select("value")
+      .eq("key", "shift_start_hour")
+      .maybeSingle();
+
+    const hour = data ? parseInt(data.value, 10) : NaN;
+    this.SHIFT_START_HOUR = Number.isFinite(hour) && hour >= 0 && hour <= 23 ? hour : 10;
+
+    const label = document.getElementById("hb-shift-hour-label");
+    if (label) label.textContent = `${String(this.SHIFT_START_HOUR).padStart(2, "0")}:00`;
+    const input = document.getElementById("hb-shift-hour-input");
+    if (input) input.value = this.SHIFT_START_HOUR;
+  },
+
+  async handleSaveHour(e) {
+    e.preventDefault();
+    const val = parseInt(document.getElementById("hb-shift-hour-input").value, 10);
+    if (!Number.isFinite(val) || val < 0 || val > 23) return alert("0-23 хооронд цаг оруулна уу.");
+
+    const { error } = await window.supabaseClient
+      .from("settings")
+      .update({ value: String(val), updated_by: HB_Auth.currentUser.id, updated_at: new Date().toISOString() })
+      .eq("key", "shift_start_hour");
+
+    if (error) return alert("Ээлжийн цаг хадгалахад алдаа гарлаа: " + error.message);
+
+    alert(`Ээлж солигдох цаг ${String(val).padStart(2, "0")}:00 боллоо.`);
+    await this.loadShiftHour();
     await this.load();
   },
 
@@ -29,7 +71,7 @@ const HB_Shift = {
       await Promise.all([
         window.supabaseClient
           .from("sessions")
-          .select("total_amount")
+          .select("total_amount, payment_method")
           .eq("status", "completed")
           .gte("ended_at", shiftStart.toISOString()),
         window.supabaseClient.from("expenses").select("amount").gte("spent_at", shiftStart.toISOString()),
@@ -45,14 +87,29 @@ const HB_Shift = {
     const revenue = (sessions || []).reduce((sum, s) => sum + Number(s.total_amount || 0), 0);
     const expense = (expenses || []).reduce((sum, e) => sum + Number(e.amount || 0), 0);
 
+    const byPayment = { cash: 0, transfer: 0, pos: 0 };
+    (sessions || []).forEach((s) => {
+      const method = s.payment_method || "cash";
+      byPayment[method] = (byPayment[method] || 0) + Number(s.total_amount || 0);
+    });
+
     this._revenue = revenue;
     this._expense = expense;
+    this._byPayment = byPayment;
     this._products = products || [];
 
     document.getElementById("hb-shift-revenue").textContent = this.formatMoney(revenue);
     document.getElementById("hb-shift-expense").textContent = this.formatMoney(expense);
     document.getElementById("hb-shift-net").textContent = this.formatMoney(revenue - expense);
     document.getElementById("hb-shift-active").textContent = (activeSessions || []).length;
+    document.getElementById("hb-shift-cash").textContent = this.formatMoney(byPayment.cash);
+    document.getElementById("hb-shift-transfer").textContent = this.formatMoney(byPayment.transfer);
+    document.getElementById("hb-shift-pos").textContent = this.formatMoney(byPayment.pos);
+
+    const rangeLabel = document.getElementById("hb-shift-range-label");
+    if (rangeLabel) {
+      rangeLabel.textContent = `${shiftStart.toLocaleString("mn-MN")} — одоо (ээлж ${String(this.SHIFT_START_HOUR).padStart(2, "0")}:00 цагт эхэлдэг)`;
+    }
 
     const stockBody = document.getElementById("hb-shift-stock-body");
     stockBody.innerHTML = (products || []).length
