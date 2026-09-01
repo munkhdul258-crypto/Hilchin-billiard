@@ -209,6 +209,14 @@ const HB_App = {
               </div>`
             : `<button type="button" class="btn btn-ghost btn-sm" data-action="toggle-item-form" data-table-id="${t.id}">+ Бараа нэмэх</button>`
         }
+        <div class="form-group">
+          <label>Төлбөрийн хэлбэр</label>
+          <select id="hb-payment-${t.id}">
+            <option value="cash">Бэлэн мөнгө</option>
+            <option value="transfer">Дансны шилжүүлэг</option>
+            <option value="pos">POS / карт</option>
+          </select>
+        </div>
         <button class="btn btn-danger" data-action="stop" data-session-id="${session.id}" data-table-id="${t.id}">
           Дуусгах
         </button>
@@ -319,6 +327,9 @@ const HB_App = {
     const session = this.activeSessions[tableId];
     if (!session) return;
 
+    const paymentSelect = document.getElementById(`hb-payment-${tableId}`);
+    const paymentMethod = paymentSelect ? paymentSelect.value : "cash";
+
     const startedAt = new Date(session.started_at).getTime();
     const endedAt = Date.now();
     const hours = (endedAt - startedAt) / 1000 / 60 / 60;
@@ -333,6 +344,7 @@ const HB_App = {
         time_amount: timeAmount,
         items_amount: itemsAmount,
         total_amount: total,
+        payment_method: paymentMethod,
         status: "completed",
       })
       .eq("id", sessionId);

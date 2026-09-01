@@ -1,23 +1,23 @@
 @import url('https://fonts.googleapis.com/css2?family=Poppins:wght@500;600;700;800&family=Inter:wght@400;500;600;700&display=swap');
 
 :root {
-  --bg: #0a1210;
-  --bg-2: #0f1b16;
-  --surface: #131f19;
-  --surface-2: #1a2b22;
-  --surface-3: #21362b;
-  --border: #26402f;
+  --bg: #0a1220;
+  --bg-2: #0d1a2c;
+  --surface: #101d31;
+  --surface-2: #16273f;
+  --surface-3: #1d3350;
+  --border: #263f61;
   --border-soft: rgba(201,162,39,0.16);
-  --text: #f2f5f2;
-  --muted: #8fa89b;
+  --text: #f0f4fa;
+  --muted: #8ba0c0;
   --primary: #d4af37;
   --primary-soft: #e8cf6f;
   --primary-dark: #a8841c;
   --danger: #ef5350;
   --danger-dark: #c0392b;
   --success: #3fb87f;
-  --felt: #0f5c3d;
-  --felt-2: #0a3f2a;
+  --felt: #14396a;
+  --felt-2: #0d2846;
   --radius: 14px;
   --radius-lg: 20px;
   --shadow-1: 0 2px 8px rgba(0,0,0,0.25);
@@ -34,8 +34,8 @@ html { scroll-behavior: smooth; }
 body {
   margin: 0;
   background:
-    radial-gradient(900px 500px at 15% -10%, rgba(212,175,55,0.07), transparent 60%),
-    radial-gradient(800px 600px at 110% 10%, rgba(63,184,127,0.06), transparent 55%),
+    radial-gradient(900px 500px at 15% -10%, rgba(212,175,55,0.06), transparent 60%),
+    radial-gradient(800px 600px at 110% 10%, rgba(59,130,246,0.08), transparent 55%),
     var(--bg);
   color: var(--text);
   min-height: 100vh;
@@ -58,7 +58,7 @@ h1, h2, h3, .nav-brand, .login-title, .hero-overlay h1 {
 
 /* Navbar */
 #hb-navbar {
-  background: rgba(19, 31, 25, 0.72);
+  background: rgba(13, 23, 39, 0.72);
   backdrop-filter: blur(14px) saturate(140%);
   -webkit-backdrop-filter: blur(14px) saturate(140%);
   border-bottom: 1px solid var(--border-soft);
@@ -146,8 +146,8 @@ h1, h2, h3, .nav-brand, .login-title, .hero-overlay h1 {
 }
 .table-card {
   background:
-    linear-gradient(160deg, rgba(15,92,61,0.85) 0%, rgba(19,31,25,0.94) 78%),
-    url('table-mini.png?v=3') center/cover no-repeat;
+    linear-gradient(160deg, rgba(20,57,106,0.85) 0%, rgba(13,23,39,0.94) 78%),
+    url('table-mini.png?v=5') center/cover no-repeat;
   border: 1px solid var(--border);
   border-radius: var(--radius);
   padding: 20px;
@@ -169,8 +169,8 @@ h1, h2, h3, .nav-brand, .login-title, .hero-overlay h1 {
 .table-card.occupied {
   border-color: rgba(239,83,80,0.4);
   background:
-    linear-gradient(160deg, rgba(58,18,16,0.88) 0%, rgba(19,31,25,0.94) 78%),
-    url('table-mini.png?v=3') center/cover no-repeat;
+    linear-gradient(160deg, rgba(58,18,16,0.88) 0%, rgba(13,23,39,0.94) 78%),
+    url('table-mini.png?v=5') center/cover no-repeat;
 }
 .table-card.occupied:hover { border-color: rgba(239,83,80,0.65); }
 .table-card-head { display: flex; align-items: center; justify-content: space-between; flex-wrap: wrap; gap: 8px; }
@@ -245,7 +245,7 @@ input:focus, select:focus { outline: none; border-color: var(--primary); box-sha
 }
 .login-card {
   width: 100%; max-width: 390px;
-  background: rgba(19, 31, 25, 0.82);
+  background: rgba(13, 23, 39, 0.85);
   backdrop-filter: blur(16px) saturate(140%);
   -webkit-backdrop-filter: blur(16px) saturate(140%);
   border: 1px solid var(--border-soft);
@@ -314,7 +314,7 @@ table.data-table a { color: var(--primary); }
 }
 .nav-bell-panel {
   position: absolute; right: 0; top: 40px; width: 300px;
-  background: rgba(19, 31, 25, 0.96);
+  background: rgba(13, 23, 39, 0.96);
   backdrop-filter: blur(10px);
   border: 1px solid var(--border-soft); border-radius: 12px; box-shadow: var(--shadow-2);
   padding: 10px; z-index: 20;

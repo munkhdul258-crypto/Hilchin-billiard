@@ -37,6 +37,10 @@ const HB_Reports = {
     if (preset === "today") {
       from = this.shiftDayStart(now);
       to = new Date(from.getTime() + 24 * 60 * 60 * 1000 - 1000);
+    } else if (preset === "yesterday") {
+      const todayStart = this.shiftDayStart(now);
+      from = new Date(todayStart.getTime() - 24 * 60 * 60 * 1000);
+      to = new Date(todayStart.getTime() - 1000);
     } else if (preset === "week") {
       from = this.shiftDayStart(now);
       from.setDate(from.getDate() - 6);
@@ -74,7 +78,7 @@ const HB_Reports = {
     const [{ data: sessions, error }, { data: expenses, error: expErr }] = await Promise.all([
       window.supabaseClient
         .from("sessions")
-        .select("*, billiard_tables(name)")
+        .select("*, billiard_tables(name), profiles(full_name, email)")
         .eq("status", "completed")
         .gte("ended_at", from.toISOString())
         .lte("ended_at", to.toISOString())
@@ -92,6 +96,8 @@ const HB_Reports = {
 
     this.renderSummary(sessions || [], expenses || []);
     this.renderByTable(sessions || []);
+    this.renderByPayment(sessions || []);
+    this.renderByStaff(sessions || []);
     this.renderHistory(sessions || []);
     this.renderExpenses(expenses || []);
     this.renderChart(sessions || [], expenses || [], from, to);
@@ -114,6 +120,10 @@ const HB_Reports = {
       .select("*")
       .order("quantity", { ascending: true });
     if (error) return;
+
+    const totalValue = (data || []).reduce((sum, p) => sum + Number(p.quantity || 0) * Number(p.unit_price || 0), 0);
+    const totalValueEl = document.getElementById("hb-stock-total-value");
+    if (totalValueEl) totalValueEl.textContent = this.formatMoney(totalValue);
 
     const tbody = document.getElementById("hb-stock-body");
     tbody.innerHTML = (data || []).length
@@ -148,6 +158,47 @@ const HB_Reports = {
       : `<tr><td colspan="3" class="muted">Мэдээлэл алга</td></tr>`;
   },
 
+  PAYMENT_LABELS: { cash: "Бэлэн мөнгө", transfer: "Дансны шилжүүлэг", pos: "POS / карт" },
+
+  renderByPayment(sessions) {
+    const map = { cash: 0, transfer: 0, pos: 0 };
+    sessions.forEach((s) => {
+      const method = s.payment_method || "cash";
+      map[method] = (map[method] || 0) + Number(s.total_amount || 0);
+    });
+
+    const total = map.cash + map.transfer + map.pos;
+    const tbody = document.getElementById("hb-by-payment-body");
+    if (!tbody) return;
+
+    tbody.innerHTML = Object.entries(map)
+      .map(([key, val]) => {
+        const pct = total > 0 ? Math.round((val / total) * 100) : 0;
+        return `<tr><td>${this.PAYMENT_LABELS[key] || key}</td><td>${this.formatMoney(val)}</td><td>${pct}%</td></tr>`;
+      })
+      .join("");
+  },
+
+  renderByStaff(sessions) {
+    const map = {};
+    sessions.forEach((s) => {
+      const name = (s.profiles && (s.profiles.full_name || s.profiles.email)) || "—";
+      if (!map[name]) map[name] = { count: 0, revenue: 0 };
+      map[name].count += 1;
+      map[name].revenue += Number(s.total_amount || 0);
+    });
+
+    const rows = Object.entries(map).sort((a, b) => b[1].revenue - a[1].revenue);
+    const tbody = document.getElementById("hb-by-staff-body");
+    if (!tbody) return;
+
+    tbody.innerHTML = rows.length
+      ? rows
+          .map(([name, v]) => `<tr><td>${name}</td><td>${v.count}</td><td>${this.formatMoney(v.revenue)}</td></tr>`)
+          .join("")
+      : `<tr><td colspan="3" class="muted">Мэдээлэл алга</td></tr>`;
+  },
+
   renderHistory(sessions) {
     const tbody = document.getElementById("hb-history-body");
     tbody.innerHTML = sessions.length
@@ -164,10 +215,11 @@ const HB_Reports = {
             <td>${this.formatMoney(s.time_amount != null ? s.time_amount : s.total_amount)}</td>
             <td>${this.formatMoney(s.items_amount || 0)}</td>
             <td>${this.formatMoney(s.total_amount)}</td>
+            <td>${this.PAYMENT_LABELS[s.payment_method] || "—"}</td>
           </tr>`;
           })
           .join("")
-      : `<tr><td colspan="6" class="muted">Мэдээлэл алга</td></tr>`;
+      : `<tr><td colspan="7" class="muted">Мэдээлэл алга</td></tr>`;
   },
 
   renderExpenses(expenses) {
