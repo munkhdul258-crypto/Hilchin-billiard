@@ -67,8 +67,9 @@ const HB_Auth = {
 
     el.innerHTML = `
       <div class="nav-inner">
-        <div class="nav-brand"><img src="logo.png?v=8" alt="Хилчин Биллиард" class="nav-logo" /> Хилчин Биллиард</div>
-        <nav class="nav-links">
+        <div class="nav-brand"><img src="logo.png?v=9" alt="Хилчин Биллиард" class="nav-logo" /> Хилчин Биллиард</div>
+        <button type="button" id="hb-nav-toggle" class="nav-toggle" aria-label="Цэс">☰</button>
+        <nav class="nav-links" id="hb-nav-links">
           ${link("index.html", "Ширээ", "tables")}
           ${link("inventory.html", "Бараа материал", "inventory")}
           ${link("debts.html", "Зээл", "debts")}
@@ -85,6 +86,15 @@ const HB_Auth = {
     `;
 
     document.getElementById("hb-logout-btn").addEventListener("click", () => this.signOut());
+
+    const navToggle = document.getElementById("hb-nav-toggle");
+    const navLinks = document.getElementById("hb-nav-links");
+    if (navToggle && navLinks) {
+      navToggle.addEventListener("click", () => navLinks.classList.toggle("open"));
+      navLinks.querySelectorAll(".nav-link").forEach((a) =>
+        a.addEventListener("click", () => navLinks.classList.remove("open"))
+      );
+    }
 
     this.initBell(isAdmin);
   },

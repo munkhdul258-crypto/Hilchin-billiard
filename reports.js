@@ -305,14 +305,17 @@ const HB_Reports = {
       data: {
         labels,
         datasets: [
-          { label: "Орлого (₮)", data: revByDay, backgroundColor: "#2563eb", borderRadius: 6 },
-          { label: "Зарлага (₮)", data: expByDay, backgroundColor: "#dc2626", borderRadius: 6 },
+          { label: "Орлого (₮)", data: revByDay, backgroundColor: "#00e5ff", borderRadius: 4 },
+          { label: "Зарлага (₮)", data: expByDay, backgroundColor: "#ff2bd6", borderRadius: 4 },
         ],
       },
       options: {
         responsive: true,
-        plugins: { legend: { display: true } },
-        scales: { y: { beginAtZero: true, ticks: { callback: (v) => v.toLocaleString("mn-MN") } } },
+        plugins: { legend: { display: true, labels: { color: "#86a0c4" } } },
+        scales: {
+          y: { beginAtZero: true, ticks: { color: "#86a0c4", callback: (v) => v.toLocaleString("mn-MN") }, grid: { color: "rgba(34,58,94,0.4)" } },
+          x: { ticks: { color: "#86a0c4" }, grid: { color: "rgba(34,58,94,0.25)" } },
+        },
       },
     });
   },
