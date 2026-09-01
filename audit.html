@@ -1,0 +1,62 @@
+<!doctype html>
+<html lang="mn">
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+  <title>Аудит лог — Хилчин Биллиард</title>
+  <link rel="stylesheet" href="style.css?v=11" />
+</head>
+<body>
+  <div id="hb-navbar"></div>
+
+  <div class="page">
+    <div class="page-header">
+      <h1>Аудит лог</h1>
+      <button type="button" id="hb-audit-refresh" class="btn btn-ghost btn-sm">↻ Шинэчлэх</button>
+    </div>
+
+    <p class="muted" style="margin-bottom:16px;">
+      Хэн, хэзээ, юуг үүсгэсэн/өөрчилсөн/устгасан — бүх түүх энд автоматаар бүртгэгдэнэ.
+    </p>
+
+    <div id="hb-error" class="error-box hidden"></div>
+
+    <div class="form-group" style="max-width:260px; margin-bottom:18px;">
+      <label for="hb-audit-table-filter">Хүснэгтээр шүүх</label>
+      <select id="hb-audit-table-filter">
+        <option value="">Бүгд</option>
+        <option value="billiard_tables">Ширээ</option>
+        <option value="sessions">Тоглолт (session)</option>
+        <option value="session_items">Session-ий бараа</option>
+        <option value="products">Бараа материал</option>
+        <option value="expenses">Зарлага</option>
+        <option value="debts">Зээл</option>
+        <option value="stock_requests">Барааны хүсэлт</option>
+        <option value="settings">Тохиргоо</option>
+        <option value="announcements">Мэдэгдэл</option>
+        <option value="shift_handovers">Ээлж хүлээлцэлт</option>
+      </select>
+    </div>
+
+    <table class="data-table">
+      <thead>
+        <tr><th>Огноо</th><th>Хэрэглэгч</th><th>Үйлдэл</th><th>Хүснэгт</th><th></th></tr>
+      </thead>
+      <tbody id="hb-audit-body"></tbody>
+    </table>
+  </div>
+
+  <div id="hb-audit-modal-overlay" class="modal-overlay hidden">
+    <div class="modal">
+      <button type="button" class="modal-close" id="hb-audit-close">×</button>
+      <div id="hb-audit-modal-body"></div>
+    </div>
+  </div>
+
+  <script src="https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2/dist/umd/supabase.min.js"></script>
+  <script src="config.js?v=11"></script>
+  <script src="supabaseClient.js?v=11"></script>
+  <script src="auth.js?v=11"></script>
+  <script src="audit.js?v=11"></script>
+</body>
+</html>
