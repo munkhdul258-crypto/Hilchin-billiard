@@ -9,6 +9,11 @@ const HB_Inventory = {
     HB_Auth.renderNavbar("inventory");
     this.isAdmin = ctx.profile && ctx.profile.role === "admin";
 
+    const submitBtn = document.querySelector('#hb-stock-form button[type="submit"]');
+    if (submitBtn) submitBtn.textContent = this.isAdmin ? "Нөөцөд нэмэх" : "Админд хүсэлт илгээх";
+    const formTitle = document.getElementById("hb-stock-form-title");
+    if (formTitle && this.isAdmin) formTitle.textContent = "Нөөцөд бараа нэмэх";
+
     document.getElementById("hb-stock-form").addEventListener("submit", (e) => this.handleSubmit(e));
     document.getElementById("hb-receipt-file").addEventListener("change", (e) => this.previewFile(e));
 
@@ -124,7 +129,8 @@ const HB_Inventory = {
       }
     }
 
-    const { error } = await window.supabaseClient.from("stock_requests").insert({
+    const status = this.isAdmin ? "approved" : "pending";
+    const insertPayload = {
       product_name: name,
       category,
       unit,
@@ -133,20 +139,62 @@ const HB_Inventory = {
       receipt_url: receiptUrl,
       note,
       submitted_by: HB_Auth.currentUser.id,
-      status: "pending",
-    });
+      status,
+    };
+    if (this.isAdmin) {
+      insertPayload.reviewed_by = HB_Auth.currentUser.id;
+      insertPayload.reviewed_at = new Date().toISOString();
+    }
+
+    const { data: inserted, error } = await window.supabaseClient
+      .from("stock_requests")
+      .insert(insertPayload)
+      .select()
+      .single();
 
     submitBtn.disabled = false;
-    submitBtn.textContent = "Админд хүсэлт илгээх";
+    submitBtn.textContent = this.isAdmin ? "Нөөцөд нэмэх" : "Админд хүсэлт илгээх";
 
     if (error) {
       this.showError("Хүсэлт илгээхэд алдаа гарлаа: " + error.message);
       return;
     }
 
+    if (this.isAdmin && inserted) {
+      await this.applyToStock(inserted);
+    }
+
     e.target.reset();
     document.getElementById("hb-receipt-preview").classList.add("hidden");
+    await this.loadProducts();
     await this.loadRequests();
+  },
+
+  async applyToStock(reqRow) {
+    const { data: existing } = await window.supabaseClient
+      .from("products")
+      .select("*")
+      .eq("name", reqRow.product_name)
+      .maybeSingle();
+
+    if (existing) {
+      await window.supabaseClient
+        .from("products")
+        .update({
+          quantity: Number(existing.quantity) + Number(reqRow.quantity),
+          unit_price: reqRow.unit_price || existing.unit_price,
+          updated_at: new Date().toISOString(),
+        })
+        .eq("id", existing.id);
+    } else {
+      await window.supabaseClient.from("products").insert({
+        name: reqRow.product_name,
+        category: reqRow.category,
+        unit: reqRow.unit,
+        quantity: reqRow.quantity,
+        unit_price: reqRow.unit_price,
+      });
+    }
   },
 
   async reviewRequest(id, status) {
@@ -164,30 +212,7 @@ const HB_Inventory = {
     if (error) return this.showError(error.message);
 
     if (status === "approved") {
-      const { data: existing } = await window.supabaseClient
-        .from("products")
-        .select("*")
-        .eq("name", reqRow.product_name)
-        .maybeSingle();
-
-      if (existing) {
-        await window.supabaseClient
-          .from("products")
-          .update({
-            quantity: Number(existing.quantity) + Number(reqRow.quantity),
-            unit_price: reqRow.unit_price || existing.unit_price,
-            updated_at: new Date().toISOString(),
-          })
-          .eq("id", existing.id);
-      } else {
-        await window.supabaseClient.from("products").insert({
-          name: reqRow.product_name,
-          category: reqRow.category,
-          unit: reqRow.unit,
-          quantity: reqRow.quantity,
-          unit_price: reqRow.unit_price,
-        });
-      }
+      await this.applyToStock(reqRow);
     }
 
     await this.loadProducts();
