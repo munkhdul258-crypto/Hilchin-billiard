@@ -181,9 +181,10 @@ const HB_App = {
           ${this.formatMoney(t.hourly_rate)} / цаг
           ${session.planned_hours ? ` · захиалсан: ${session.planned_hours} ц` : ""}
         </div>
-        <div class="table-timer" data-started="${session.started_at}" data-rate="${session.hourly_rate}" data-items="${itemsTotal}">
+        <div class="table-timer" data-started="${session.started_at}" data-rate="${session.hourly_rate}" data-items="${itemsTotal}" data-planned="${session.planned_hours || ""}">
           <div class="timer-time">00:00:00</div>
           <div class="timer-amount">0₮</div>
+          <div class="timer-alert hidden">⏰ Захиалсан цаг дууслаа!</div>
         </div>
         ${
           items.length
@@ -290,6 +291,7 @@ const HB_App = {
       const started = new Date(el.dataset.started).getTime();
       const rate = parseFloat(el.dataset.rate);
       const itemsTotal = parseFloat(el.dataset.items || "0");
+      const planned = parseFloat(el.dataset.planned || "0");
       const elapsedMs = Date.now() - started;
       const elapsedHours = elapsedMs / 1000 / 60 / 60;
       const timeAmount = Math.max(0, elapsedHours * rate);
@@ -297,6 +299,12 @@ const HB_App = {
       el.querySelector(".timer-time").textContent = this.formatDuration(elapsedMs);
       el.querySelector(".timer-amount").textContent =
         this.formatMoney(timeAmount + itemsTotal) + (itemsTotal ? ` (цаг: ${this.formatMoney(timeAmount)} + бараа: ${this.formatMoney(itemsTotal)})` : "");
+
+      const alertEl = el.querySelector(".timer-alert");
+      const card = el.closest(".table-card");
+      const isOverdue = planned > 0 && elapsedHours >= planned;
+      if (alertEl) alertEl.classList.toggle("hidden", !isOverdue);
+      if (card) card.classList.toggle("time-up", isOverdue);
     });
   },
 

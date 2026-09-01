@@ -67,7 +67,7 @@ const HB_Auth = {
 
     el.innerHTML = `
       <div class="nav-inner">
-        <div class="nav-brand"><img src="logo.png?v=9" alt="Хилчин Биллиард" class="nav-logo" /> Хилчин Биллиард</div>
+        <div class="nav-brand"><img src="logo.png?v=10" alt="Хилчин Биллиард" class="nav-logo" /> Хилчин Биллиард</div>
         <button type="button" id="hb-nav-toggle" class="nav-toggle" aria-label="Цэс">☰</button>
         <nav class="nav-links" id="hb-nav-links">
           ${link("index.html", "Ширээ", "tables")}
@@ -113,6 +113,11 @@ const HB_Auth = {
           .eq("active", true)
           .order("created_at", { ascending: false })
           .limit(10),
+        window.supabaseClient
+          .from("sessions")
+          .select("id, started_at, planned_hours, billiard_tables(name)")
+          .eq("status", "active")
+          .not("planned_hours", "is", null),
       ];
       if (isAdmin) {
         queries.push(
@@ -127,10 +132,15 @@ const HB_Auth = {
 
       const results = await Promise.all(queries);
       const announcements = results[0].data || [];
-      const pendingStock = isAdmin ? results[1].data || [] : [];
-      const overdueDebts = isAdmin ? results[2].data || [] : [];
+      const overdueSessions = (results[1].data || []).filter((s) => {
+        if (!s.planned_hours) return false;
+        const elapsedHours = (Date.now() - new Date(s.started_at).getTime()) / 3600000;
+        return elapsedHours >= s.planned_hours;
+      });
+      const pendingStock = isAdmin ? results[2].data || [] : [];
+      const overdueDebts = isAdmin ? results[3].data || [] : [];
 
-      const count = announcements.length + pendingStock.length + overdueDebts.length;
+      const count = announcements.length + overdueSessions.length + pendingStock.length + overdueDebts.length;
       const dot = document.getElementById("hb-bell-dot");
       const panel = document.getElementById("hb-bell-panel");
       if (!dot || !panel) return;
@@ -144,6 +154,11 @@ const HB_Auth = {
 
       const items = [];
       announcements.forEach((a) => items.push(`<div class="bell-item">📢 ${a.message}</div>`));
+      overdueSessions.forEach((s) =>
+        items.push(
+          `<div class="bell-item">⏰ <a href="index.html">${s.billiard_tables ? s.billiard_tables.name : "Ширээ"}</a> — захиалсан цаг дууссан</div>`
+        )
+      );
       pendingStock.forEach((r) =>
         items.push(`<div class="bell-item">📦 <a href="inventory.html">${r.product_name}</a> — хүсэлт хүлээгдэж байна</div>`)
       );
@@ -156,6 +171,7 @@ const HB_Auth = {
     };
 
     await refresh();
+    setInterval(refresh, 30000);
 
     const bellBtn = document.getElementById("hb-bell-btn");
     const panel = document.getElementById("hb-bell-panel");
@@ -171,6 +187,7 @@ const HB_Auth = {
       .on("postgres_changes", { event: "*", schema: "public", table: "stock_requests" }, refresh)
       .on("postgres_changes", { event: "*", schema: "public", table: "debts" }, refresh)
       .on("postgres_changes", { event: "*", schema: "public", table: "announcements" }, refresh)
+      .on("postgres_changes", { event: "*", schema: "public", table: "sessions" }, refresh)
       .subscribe();
   },
 };

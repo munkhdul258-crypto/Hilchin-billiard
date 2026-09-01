@@ -255,10 +255,19 @@ h1, h2, h3, .login-title, .hero-overlay h1 {
   border-color: rgba(255,43,214,0.35);
   background:
     linear-gradient(160deg, rgba(70,14,50,0.85) 0%, rgba(13,23,39,0.94) 78%),
-    url('table-mini.png?v=8') center/cover no-repeat;
+    url('table-mini.png?v=10') center/cover no-repeat;
 }
 .table-card.occupied::after { background: linear-gradient(90deg, var(--neon-pink), transparent 60%); }
 .table-card.occupied:hover { border-color: rgba(255,43,214,0.6); box-shadow: var(--shadow-2), var(--glow-pink); }
+.table-card.occupied.time-up {
+  border-color: var(--danger);
+  box-shadow: 0 0 0 2px rgba(255,59,110,0.55), 0 0 22px rgba(255,59,110,0.4);
+  animation: pulseWarn 1.2s ease-in-out infinite;
+}
+@keyframes pulseWarn {
+  0%, 100% { box-shadow: 0 0 0 2px rgba(255,59,110,0.55), 0 0 22px rgba(255,59,110,0.4); }
+  50% { box-shadow: 0 0 0 2px rgba(255,59,110,0.9), 0 0 32px rgba(255,59,110,0.7); }
+}
 .table-card-head { display: flex; align-items: center; justify-content: space-between; flex-wrap: wrap; gap: 8px; }
 .table-card-head h3 { margin: 0; font-size: 1.08rem; font-family: "Poppins", sans-serif; }
 .table-card-rate { color: var(--muted); font-size: 0.85rem; }
@@ -275,6 +284,16 @@ h1, h2, h3, .login-title, .hero-overlay h1 {
 .table-timer { background: rgba(0,0,0,0.32); border-radius: 8px; padding: 12px; text-align: center; border: 1px solid rgba(0,229,255,0.15); }
 .timer-time { font-size: 1.3rem; font-weight: 700; letter-spacing: 0.04em; color: var(--neon-cyan-soft); text-shadow: 0 0 12px rgba(0,229,255,0.5); }
 .timer-amount { color: var(--muted); font-size: 0.85rem; margin-top: 2px; font-family: "Inter", sans-serif; }
+.timer-alert {
+  margin-top: 8px;
+  font-size: 0.8rem;
+  font-weight: 700;
+  color: #ffdfe8;
+  background: rgba(255,59,110,0.22);
+  border: 1px solid rgba(255,59,110,0.5);
+  border-radius: 6px;
+  padding: 6px 8px;
+}
 
 /* Forms */
 .card { background: var(--surface); border: 1px solid var(--border); border-radius: var(--radius); padding: 22px; box-shadow: var(--shadow-1); position: relative; }
