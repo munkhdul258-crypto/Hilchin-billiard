@@ -1,0 +1,46 @@
+name: Database Backup
+
+on:
+  schedule:
+    # 14 хоног тутам, өдрийн 1, 15, 29-нд UTC 20:00 (Монголын шөнийн цагаар)
+    - cron: "0 20 */14 * *"
+  workflow_dispatch: {}
+
+jobs:
+  backup:
+    runs-on: ubuntu-latest
+    steps:
+      - name: Огноо бэлдэх
+        run: echo "BACKUP_DATE=$(date +%F)" >> "$GITHUB_ENV"
+
+      - name: postgresql-client суулгах
+        run: sudo apt-get update -y && sudo apt-get install -y postgresql-client
+
+      - name: Database dump хийх
+        env:
+          DATABASE_URL: ${{ secrets.DATABASE_URL }}
+        run: |
+          set -e
+          pg_dump "$DATABASE_URL" --schema=public --no-owner --no-privileges --clean --if-exists \
+            -f "hilchin-backup-${BACKUP_DATE}.sql"
+          gzip "hilchin-backup-${BACKUP_DATE}.sql"
+          echo "BACKUP_FILE=hilchin-backup-${BACKUP_DATE}.sql.gz" >> "$GITHUB_ENV"
+
+      - name: Имэйлээр илгээх
+        uses: dawidd6/action-send-mail@v3
+        with:
+          server_address: smtp.gmail.com
+          server_port: 465
+          username: ${{ secrets.MAIL_USERNAME }}
+          password: ${{ secrets.MAIL_PASSWORD }}
+          subject: "Hilchin Billiard — backup ${{ env.BACKUP_DATE }}"
+          to: ${{ secrets.MAIL_TO }}
+          from: "Hilchin Billiard Backup"
+          body: |
+            Сайн байна уу.
+
+            Хавсралтад Supabase өгөгдлийн сангийн ${{ env.BACKUP_DATE }} өдрийн backup орсон байна
+            (.sql.gz файл — задлаад SQL Editor-т paste хийж restore хийж болно).
+
+            Энэ имэйл 14 хоног тутам автоматаар ирнэ.
+          attachments: ${{ env.BACKUP_FILE }}
