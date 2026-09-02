@@ -67,7 +67,7 @@ const HB_Auth = {
 
     el.innerHTML = `
       <div class="nav-inner">
-        <div class="nav-brand"><img src="logo.png?v=18" alt="Хилчин Биллиард" class="nav-logo" /> Хилчин Биллиард</div>
+        <div class="nav-brand"><img src="logo.png?v=19" alt="Хилчин Биллиард" class="nav-logo" /> Хилчин Биллиард</div>
         <button type="button" id="hb-nav-toggle" class="nav-toggle" aria-label="Цэс">☰</button>
         <nav class="nav-links" id="hb-nav-links">
           ${link("index.html", "Ширээ", "tables")}
@@ -76,6 +76,7 @@ const HB_Auth = {
           ${link("debts.html", "Зээл", "debts")}
           ${link("shift.html", "Ээлж", "shift")}
           ${link("reports.html", "Тайлан", "reports")}
+          ${isAdmin ? link("dashboard.html", "Хянах самбар", "dashboard") : ""}
           ${isAdmin ? link("staff.html", "Ажилтан", "staff") : ""}
           ${isAdmin ? link("audit.html", "Аудит", "audit") : ""}
         </nav>

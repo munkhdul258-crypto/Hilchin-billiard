@@ -27,6 +27,16 @@ const HB_Shift = {
     if (this.isAdmin) {
       document.getElementById("hb-shift-hour-wrap").classList.remove("hidden");
       document.getElementById("hb-shift-hour-form").addEventListener("submit", (e) => this.handleSaveHour(e));
+      document.querySelectorAll(".admin-only").forEach((el) => el.classList.remove("hidden"));
+
+      const detailsToggle = document.getElementById("hb-rc-details-toggle");
+      const details = document.getElementById("hb-rc-details");
+      if (detailsToggle && details) {
+        detailsToggle.addEventListener("click", () => {
+          const nowHidden = details.classList.toggle("hidden");
+          detailsToggle.textContent = nowHidden ? "Дэлгэрэнгүй тооцоо ▾" : "Дэлгэрэнгүй тооцоо ▴";
+        });
+      }
     }
 
     await this.loadShiftHour();
@@ -102,7 +112,7 @@ const HB_Shift = {
         .limit(20),
       window.supabaseClient
         .from("cash_movements")
-        .select("*, profiles(full_name, email)")
+        .select("*")
         .gte("created_at", shiftStart.toISOString())
         .order("created_at", { ascending: false }),
       window.supabaseClient
@@ -185,23 +195,21 @@ const HB_Shift = {
     const body = document.getElementById("hb-movements-body");
     body.innerHTML = this._movements.length
       ? this._movements
-          .map((m) => {
-            const who = (m.profiles && (m.profiles.full_name || m.profiles.email)) || "—";
-            return `
+          .map(
+            (m) => `
           <tr>
-            <td>${new Date(m.created_at).toLocaleString("mn-MN")}</td>
+            <td>${new Date(m.created_at).toLocaleDateString("mn-MN")}</td>
             <td>${m.direction === "out" ? "Гарсан" : "Орсон"}</td>
-            <td>${this.MOVEMENT_CATEGORY_LABELS[m.category] || m.category}</td>
             <td>${this.PAYMENT_LABELS[m.payment_method] || m.payment_method}</td>
             <td>${m.person_name || "—"}</td>
-            <td>${m.reason || "—"} <span class="muted" style="font-size:0.75rem;">(${who})</span></td>
+            <td>${m.reason || "—"}</td>
             <td>${this.formatMoney(m.amount)}</td>
             <td><button type="button" class="btn btn-ghost btn-sm" data-action="del-mv" data-id="${m.id}">Устгах</button></td>
           </tr>
-        `;
-          })
+        `
+          )
           .join("")
-      : `<tr><td colspan="8" class="muted">Энэ ээлжид бүртгэгдсэн хөдөлгөөн алга.</td></tr>`;
+      : `<tr><td colspan="7" class="muted">Хөдөлгөөн алга.</td></tr>`;
 
     body.querySelectorAll('[data-action="del-mv"]').forEach((btn) =>
       btn.addEventListener("click", () => this.deleteMovement(btn.dataset.id))

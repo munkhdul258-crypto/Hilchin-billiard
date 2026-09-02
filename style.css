@@ -265,7 +265,7 @@ h1, h2, h3, .login-title, .hero-overlay h1 {
   border-color: rgba(255,43,214,0.35);
   background:
     linear-gradient(160deg, rgba(70,14,50,0.85) 0%, rgba(13,23,39,0.94) 78%),
-    url('table-mini.png?v=18') center/cover no-repeat;
+    url('table-mini.png?v=19') center/cover no-repeat;
 }
 .table-card.occupied::after { background: linear-gradient(90deg, var(--neon-pink), transparent 60%); }
 .table-card.occupied:hover { border-color: rgba(255,43,214,0.6); box-shadow: var(--shadow-2), var(--glow-pink); }
@@ -562,31 +562,41 @@ table.data-table a { color: var(--neon-cyan-soft); }
   #hb-qr-print-grid { position: absolute; top: 0; left: 0; width: 100%; }
 }
 
-/* Кассын нягтлан бодох (Ээлж хуудас) */
-.reconcile-block { border-bottom: 1px solid var(--border); padding-bottom: 12px; margin-bottom: 12px; }
-.reconcile-block:last-child { border-bottom: none; margin-bottom: 0; padding-bottom: 0; }
-.reconcile-row {
-  display: flex; align-items: center; justify-content: space-between; gap: 12px;
-  padding: 6px 0; font-size: 0.88rem; color: var(--muted);
-}
-.reconcile-row span:first-child { flex: 1; }
-.reconcile-row .reconcile-val { font-family: "Orbitron", sans-serif; color: var(--text); white-space: nowrap; }
-.reconcile-row.subtle { font-size: 0.82rem; }
-.reconcile-row.total {
-  border-top: 1px solid var(--border-soft); margin-top: 6px; padding-top: 10px;
-  font-weight: 700; color: var(--text); font-size: 0.98rem;
-}
-.reconcile-row.total .reconcile-val { font-size: 1.15rem; }
-.reconcile-row.grand { border-top: 2px solid var(--primary); margin-top: 10px; padding-top: 12px; font-size: 1.05rem; }
-.reconcile-row.grand .reconcile-val { font-size: 1.3rem; text-shadow: 0 0 12px currentColor; }
-.reconcile-input {
-  width: 150px; text-align: right; font-family: "Orbitron", sans-serif;
-  border: 1px solid var(--border-soft); border-radius: 8px; padding: 6px 10px;
-  background: var(--surface-2); color: var(--text); font-size: 0.92rem;
-}
+/* Кассын нягтлан бодох (Ээлж хуудас) — энгийн, товч хэлбэр */
 .diff-surplus { color: var(--success); }
 .diff-shortage { color: var(--danger); }
 .diff-even { color: var(--muted); }
+
+.reconcile-compact { display: flex; flex-direction: column; gap: 10px; }
+.rc-row {
+  display: flex; align-items: center; gap: 10px; flex-wrap: wrap;
+  padding: 12px 14px; background: var(--surface-2); border-radius: 10px; border: 1px solid var(--border);
+}
+.rc-label { font-weight: 700; min-width: 130px; }
+.rc-expected { color: var(--muted); font-size: 0.82rem; flex: 1; min-width: 120px; }
+.rc-expected b { color: var(--text); font-family: "Orbitron", sans-serif; }
+.reconcile-input {
+  width: 150px; text-align: right; font-family: "Orbitron", sans-serif;
+  border: 1px solid var(--border-soft); border-radius: 8px; padding: 8px 10px;
+  background: var(--surface-3); color: var(--text); font-size: 0.92rem;
+}
+.rc-diff-badge {
+  font-family: "Orbitron", sans-serif; font-weight: 700; font-size: 0.82rem;
+  padding: 5px 12px; border-radius: 6px; white-space: nowrap;
+}
+.rc-diff-badge.diff-surplus { background: rgba(63,237,181,0.15); }
+.rc-diff-badge.diff-shortage { background: rgba(255,43,110,0.15); }
+.rc-diff-badge.diff-even { background: rgba(134,160,196,0.12); }
+.rc-total-row {
+  display: flex; align-items: center; justify-content: space-between;
+  padding: 14px; border-top: 2px solid var(--primary); margin-top: 4px; font-weight: 700;
+}
+.rc-total-row .rc-diff-badge { font-size: 1rem; padding: 6px 16px; }
+.rc-details-toggle { background: none; border: none; color: var(--neon-cyan-soft); cursor: pointer; font-size: 0.82rem; padding: 0 0 10px; display: block; }
+.rc-details { display: flex; flex-direction: column; gap: 6px; margin-bottom: 14px; padding: 12px; background: var(--surface); border-radius: 10px; border: 1px dashed var(--border); }
+.rc-details-row { display: flex; align-items: center; justify-content: space-between; font-size: 0.82rem; color: var(--muted); }
+.rc-details-row b { color: var(--text); font-family: "Orbitron", sans-serif; }
+
 .cash-movement-form { display: flex; flex-wrap: wrap; gap: 10px; align-items: flex-end; }
 .cash-movement-form .form-group { min-width: 130px; flex: 1; }
 
