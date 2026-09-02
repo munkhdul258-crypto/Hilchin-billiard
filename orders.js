@@ -16,6 +16,8 @@ const HB_Orders = {
     document.getElementById("hb-qr-overlay").addEventListener("click", (e) => {
       if (e.target.id === "hb-qr-overlay") this.closeQr();
     });
+    document.getElementById("hb-qr-table-select").addEventListener("change", (e) => this.renderQrFor(e.target.value));
+    document.getElementById("hb-qr-print-all").addEventListener("click", () => this.togglePrintAll());
 
     await this.loadTableNames();
     await this.load();
@@ -31,8 +33,9 @@ const HB_Orders = {
   },
 
   async loadTableNames() {
-    const { data } = await window.supabaseClient.from("billiard_tables").select("id, name");
+    const { data } = await window.supabaseClient.from("billiard_tables").select("id, name").order("name");
     this.tableNames = {};
+    this.allTables = data || [];
     (data || []).forEach((t) => (this.tableNames[t.id] = t.name));
   },
 
@@ -175,13 +178,49 @@ const HB_Orders = {
   },
 
   showQr() {
-    const url = `${window.location.origin}/order.html`;
+    const select = document.getElementById("hb-qr-table-select");
+    select.innerHTML = (this.allTables || [])
+      .map((t) => `<option value="${t.id}">${t.name}</option>`)
+      .join("");
+    document.getElementById("hb-qr-print-grid").classList.add("hidden");
+
+    if (this.allTables && this.allTables.length) {
+      select.value = this.allTables[0].id;
+      this.renderQrFor(this.allTables[0].id);
+    } else {
+      document.getElementById("hb-qr-url").textContent = "Эхлээд ширээ нэмнэ үү.";
+    }
+
+    document.getElementById("hb-qr-overlay").classList.remove("hidden");
+  },
+
+  renderQrFor(tableId) {
+    if (!tableId) return;
+    const url = `${window.location.origin}/order.html?table=${tableId}`;
     document.getElementById("hb-qr-url").textContent = url;
     const img = document.getElementById("hb-qr-img");
     if (img) {
       img.src = `https://api.qrserver.com/v1/create-qr-code/?size=240x240&data=${encodeURIComponent(url)}`;
     }
-    document.getElementById("hb-qr-overlay").classList.remove("hidden");
+  },
+
+  togglePrintAll() {
+    const grid = document.getElementById("hb-qr-print-grid");
+    const willShow = grid.classList.contains("hidden");
+    if (willShow) {
+      grid.innerHTML = (this.allTables || [])
+        .map((t) => {
+          const url = `${window.location.origin}/order.html?table=${t.id}`;
+          return `
+            <div class="qr-print-cell">
+              <img src="https://api.qrserver.com/v1/create-qr-code/?size=180x180&data=${encodeURIComponent(url)}" width="180" height="180" alt="${t.name}" />
+              <div class="qr-print-label">${t.name}</div>
+            </div>
+          `;
+        })
+        .join("");
+    }
+    grid.classList.toggle("hidden");
   },
 
   closeQr() {

@@ -19,8 +19,56 @@ const HB_Order = {
       document.getElementById("hb-bill-history").classList.toggle("hidden");
     });
 
-    await this.loadTables();
+    // Ширээн дээрх QR-аар (жишээ нь order.html?table=xxxx) орж ирсэн бол
+    // тухайн ширээндээ л "цоожлогдоно" — өөр ширээ сонгох боломжгүй болно.
+    // Ингэснээр хажуугийн ширээнийхэн андуурч, эсвэл санаатайгаар өөр
+    // ширээгээр захиалга өгөх боломжгүй болно.
+    this.lockedTableId = new URLSearchParams(window.location.search).get("table");
+
     await this.loadProducts();
+
+    if (this.lockedTableId) {
+      await this.initLockedTable();
+    } else {
+      await this.initFreeChoice();
+    }
+
+    this.subscribeBill();
+    setInterval(() => this.updateBillTotal(), 1000);
+  },
+
+  async initLockedTable() {
+    document.getElementById("hb-back-to-table").classList.add("hidden");
+
+    const { data: table, error } = await window.supabaseClient
+      .from("billiard_tables")
+      .select("*")
+      .eq("id", this.lockedTableId)
+      .maybeSingle();
+
+    if (error || !table) {
+      this.renderLockedMessage("Энэ ширээний QR код олдсонгүй. Ажилтнаас лавлана уу.");
+      return;
+    }
+    if (table.status !== "occupied") {
+      this.renderLockedMessage("Энэ ширээнд одоогоор тоглолт эхлээгүй байна. Ажилтнаас лавлана уу.");
+      return;
+    }
+
+    this.tables = [table];
+    this.selectTable(table.id);
+  },
+
+  renderLockedMessage(msg) {
+    const title = document.getElementById("hb-step-table-title");
+    if (title) title.textContent = "Захиалга өгөх боломжгүй байна";
+    const grid = document.getElementById("hb-table-grid");
+    grid.innerHTML = `<p class="muted">${msg}</p>`;
+    this.showStep("table");
+  },
+
+  async initFreeChoice() {
+    await this.loadTables();
 
     let savedTableId = null;
     try {
@@ -33,9 +81,6 @@ const HB_Order = {
     } else if (savedTableId) {
       this.forgetTable();
     }
-
-    this.subscribeBill();
-    setInterval(() => this.updateBillTotal(), 1000);
   },
 
   rememberTable(tableId) {
@@ -64,6 +109,23 @@ const HB_Order = {
   },
 
   async handleTablesChange() {
+    if (this.lockedTableId) {
+      const { data: table } = await window.supabaseClient
+        .from("billiard_tables")
+        .select("*")
+        .eq("id", this.lockedTableId)
+        .maybeSingle();
+      if (!table || table.status !== "occupied") {
+        this.selectedTableId = null;
+        this.activeSession = null;
+        document.getElementById("hb-bill-panel").classList.add("hidden");
+        this.renderLockedMessage("Тоглолт дууссан тул захиалга өгөх боломжгүй боллоо. Ажилтнаас лавлана уу.");
+      } else {
+        this.tables = [table];
+      }
+      return;
+    }
+
     await this.loadTables();
     if (this.selectedTableId && !this.tables.find((t) => t.id === this.selectedTableId)) {
       this.selectedTableId = null;

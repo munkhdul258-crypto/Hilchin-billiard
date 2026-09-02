@@ -4,7 +4,7 @@
   <meta charset="UTF-8" />
   <meta name="viewport" content="width=device-width, initial-scale=1.0" />
   <title>Захиалга — Хилчин Биллиард</title>
-  <link rel="stylesheet" href="style.css?v=16" />
+  <link rel="stylesheet" href="style.css?v=17" />
 </head>
 <body>
   <div id="hb-navbar"></div>
@@ -36,19 +36,25 @@
   <div id="hb-qr-overlay" class="modal-overlay hidden">
     <div class="modal">
       <button type="button" class="modal-close" id="hb-qr-close">×</button>
-      <div class="modal-title">QR цэс</div>
-      <p class="muted" style="margin-bottom:14px;">Энэ QR-г хэвлээд ширээн дээр байрлуулбал харилцагч утсаараа уншиж захиалга өгөх боломжтой болно.</p>
+      <div class="modal-title">Ширээний QR</div>
+      <p class="muted" style="margin-bottom:14px;">Ширээ бүр өөрийн ТУСДАА QR кодтой байх ёстой — ингэснээр хажуугийн ширээнийхэн андуурч, эсвэл санаатайгаар өөр ширээгээр захиалга өгөх боломжгүй болно. Доороос ширээгээ сонгоод, гарч ирсэн QR-г хэвлээд яг тухайн ширээн дээрээ байрлуулна уу.</p>
+      <div class="form-group" style="margin-bottom:12px;">
+        <label for="hb-qr-table-select">Ширээ сонгох</label>
+        <select id="hb-qr-table-select"></select>
+      </div>
       <div style="background:#fff; padding:16px; border-radius:10px; display:flex; justify-content:center;">
         <img id="hb-qr-img" width="220" height="220" alt="QR код" />
       </div>
       <p class="muted" style="margin-top:12px; font-size:0.8rem; word-break:break-all;" id="hb-qr-url"></p>
+      <button type="button" class="btn btn-ghost btn-sm btn-full" id="hb-qr-print-all" style="margin-top:14px;">🖨️ Бүх ширээний QR-г нэг дор харах / хэвлэх</button>
+      <div id="hb-qr-print-grid" class="qr-print-grid hidden"></div>
     </div>
   </div>
 
   <script src="https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2/dist/umd/supabase.min.js"></script>
-  <script src="config.js?v=16"></script>
-  <script src="supabaseClient.js?v=16"></script>
-  <script src="auth.js?v=16"></script>
-  <script src="orders.js?v=16"></script>
+  <script src="config.js?v=17"></script>
+  <script src="supabaseClient.js?v=17"></script>
+  <script src="auth.js?v=17"></script>
+  <script src="orders.js?v=17"></script>
 </body>
 </html>
