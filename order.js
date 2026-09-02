@@ -1,19 +1,147 @@
 // QR цэсний захиалгын хуудас. Нэвтрэлт шаардахгүй, олон нийтэд нээлттэй.
 // Урсгал: Ширээ сонгох → Цэснээс сагслах → Захиалга илгээх.
 
+const STORAGE_KEY = "hb_order_table_id";
+
 const HB_Order = {
   tables: [],
   products: [],
   selectedTableId: null,
+  activeSession: null,
+  myOrders: [],
   cart: {}, // product_id -> { product, qty }
 
   async init() {
     document.getElementById("hb-back-to-table").addEventListener("click", () => this.showStep("table"));
     document.getElementById("hb-submit-order").addEventListener("click", () => this.submitOrder());
     document.getElementById("hb-new-order").addEventListener("click", () => this.resetAndStart());
+    document.getElementById("hb-bill-toggle").addEventListener("click", () => {
+      document.getElementById("hb-bill-history").classList.toggle("hidden");
+    });
 
     await this.loadTables();
     await this.loadProducts();
+
+    let savedTableId = null;
+    try {
+      savedTableId = localStorage.getItem(STORAGE_KEY);
+    } catch (e) {
+      /* browser storage blocked — no big deal, just skip restoring */
+    }
+    if (savedTableId && this.tables.find((t) => t.id === savedTableId)) {
+      this.selectTable(savedTableId);
+    } else if (savedTableId) {
+      this.forgetTable();
+    }
+
+    this.subscribeBill();
+    setInterval(() => this.updateBillTotal(), 1000);
+  },
+
+  rememberTable(tableId) {
+    try {
+      localStorage.setItem(STORAGE_KEY, tableId);
+    } catch (e) {
+      /* ignore — browser storage may be unavailable */
+    }
+  },
+
+  forgetTable() {
+    try {
+      localStorage.removeItem(STORAGE_KEY);
+    } catch (e) {
+      /* ignore */
+    }
+  },
+
+  subscribeBill() {
+    window.supabaseClient
+      .channel("hb-order-bill")
+      .on("postgres_changes", { event: "*", schema: "public", table: "sessions" }, () => this.refreshBill())
+      .on("postgres_changes", { event: "*", schema: "public", table: "customer_orders" }, () => this.refreshBill())
+      .on("postgres_changes", { event: "*", schema: "public", table: "billiard_tables" }, () => this.handleTablesChange())
+      .subscribe();
+  },
+
+  async handleTablesChange() {
+    await this.loadTables();
+    if (this.selectedTableId && !this.tables.find((t) => t.id === this.selectedTableId)) {
+      this.selectedTableId = null;
+      this.activeSession = null;
+      this.forgetTable();
+      document.getElementById("hb-bill-panel").classList.add("hidden");
+      if (!document.getElementById("hb-step-done").classList.contains("active")) {
+        this.showStep("table");
+      }
+    }
+  },
+
+  async refreshBill() {
+    if (!this.selectedTableId) {
+      document.getElementById("hb-bill-panel").classList.add("hidden");
+      return;
+    }
+
+    const { data: session } = await window.supabaseClient
+      .from("sessions")
+      .select("*")
+      .eq("table_id", this.selectedTableId)
+      .eq("status", "active")
+      .maybeSingle();
+    this.activeSession = session || null;
+
+    const { data: orders } = await window.supabaseClient
+      .from("customer_orders")
+      .select("*")
+      .eq("table_id", this.selectedTableId)
+      .order("created_at", { ascending: false })
+      .limit(20);
+    this.myOrders = orders || [];
+
+    this.renderBill();
+  },
+
+  renderBill() {
+    const panel = document.getElementById("hb-bill-panel");
+    if (!this.selectedTableId || !this.activeSession) {
+      panel.classList.add("hidden");
+      return;
+    }
+    panel.classList.remove("hidden");
+
+    const table = this.tables.find((t) => t.id === this.selectedTableId);
+    document.getElementById("hb-bill-table-name").textContent = table ? table.name : "";
+    this.updateBillTotal();
+
+    const historyEl = document.getElementById("hb-bill-history");
+    const statusLabel = { pending: "Хүлээгдэж буй", confirmed: "Баталгаажсан", rejected: "Татгалзсан" };
+    historyEl.innerHTML = this.myOrders.length
+      ? this.myOrders
+          .map((o) => {
+            const itemsSummary = (o.items || []).map((it) => `${it.product_name}×${it.quantity}`).join(", ");
+            return `
+              <div class="bill-history-item">
+                <div class="bill-history-top">
+                  <span class="status-pill status-${o.status}">${statusLabel[o.status] || o.status}</span>
+                  <span class="muted" style="font-size:0.75rem;">${new Date(o.created_at).toLocaleTimeString("mn-MN")}</span>
+                </div>
+                <div class="bill-history-items">${itemsSummary} — ${this.formatMoney(o.total_amount)}</div>
+              </div>
+            `;
+          })
+          .join("")
+      : `<p class="muted" style="font-size:0.8rem;">Захиалгын түүх алга.</p>`;
+  },
+
+  updateBillTotal() {
+    if (!this.activeSession) return;
+    const started = new Date(this.activeSession.started_at).getTime();
+    const rate = Number(this.activeSession.hourly_rate || 0);
+    const elapsedHours = (Date.now() - started) / 3600000;
+    const timeAmount = Math.max(0, elapsedHours * rate);
+    const itemsAmount = Number(this.activeSession.items_amount || 0);
+    const totalEl = document.getElementById("hb-bill-total");
+    if (totalEl) totalEl.textContent = this.formatMoney(timeAmount + itemsAmount);
   },
 
   async loadTables() {
@@ -56,10 +184,12 @@ const HB_Order = {
 
   selectTable(tableId) {
     this.selectedTableId = tableId;
+    this.rememberTable(tableId);
     const table = this.tables.find((t) => t.id === tableId);
     document.getElementById("hb-selected-table-name").textContent = table ? table.name : "";
     this.renderMenu();
     this.showStep("menu");
+    this.refreshBill();
   },
 
   renderMenu() {
@@ -161,13 +291,20 @@ const HB_Order = {
 
     document.getElementById("hb-cart-bar").classList.add("hidden");
     this.showStep("done");
+    this.refreshBill();
   },
 
   resetAndStart() {
     this.cart = {};
-    this.selectedTableId = null;
     document.getElementById("hb-order-note").value = "";
-    this.showStep("table");
+    if (this.selectedTableId && this.tables.find((t) => t.id === this.selectedTableId)) {
+      this.renderMenu();
+      this.showStep("menu");
+    } else {
+      this.selectedTableId = null;
+      this.forgetTable();
+      this.showStep("table");
+    }
   },
 
   showStep(step) {
