@@ -4,60 +4,90 @@
   <meta charset="UTF-8" />
   <meta name="viewport" content="width=device-width, initial-scale=1.0" />
   <title>Захиалга — Хилчин Биллиард</title>
-  <link rel="stylesheet" href="style.css?v=14" />
+  <link rel="stylesheet" href="style.css?v=15" />
   <style>
-    .order-page { max-width: 480px; margin: 0 auto; padding: 20px 16px 120px; }
-    .order-header { display: flex; align-items: center; gap: 10px; margin-bottom: 18px; }
-    .order-header img { height: 38px; width: auto; border-radius: 8px; }
-    .order-header h1 { font-size: 1.1rem; margin: 0; }
-    .order-step { display: none; }
+    .order-navbar {
+      display: flex; align-items: center; gap: 10px;
+      background: rgba(9, 14, 26, 0.85);
+      backdrop-filter: blur(14px) saturate(150%);
+      -webkit-backdrop-filter: blur(14px) saturate(150%);
+      padding: 14px 18px;
+      position: sticky; top: 0; z-index: 30;
+      border-bottom: 1px solid var(--border-soft);
+    }
+    .order-navbar::after {
+      content: ""; position: absolute; left: 0; right: 0; bottom: -2px; height: 2px;
+      background: linear-gradient(90deg, transparent, var(--neon-cyan) 20%, var(--primary) 50%, var(--neon-pink) 80%, transparent);
+      opacity: 0.65;
+    }
+    .order-brand {
+      font-weight: 800; letter-spacing: 0.04em; text-transform: uppercase; font-size: 0.98rem;
+      font-family: "Poppins", "Inter", sans-serif;
+      background: linear-gradient(120deg, var(--neon-cyan-soft), var(--primary-soft) 45%, var(--neon-pink-soft));
+      -webkit-background-clip: text; background-clip: text; color: transparent;
+    }
+    .order-page { max-width: 480px; margin: 0 auto; padding: 22px 16px 130px; position: relative; }
+    .order-step { display: none; animation: fadeUp 0.3s var(--ease); }
     .order-step.active { display: block; }
+    .order-step-title { font-size: 1rem; font-weight: 700; margin: 0 0 14px; color: var(--text); font-family: "Poppins", sans-serif; }
+
     .table-pick-grid { display: grid; grid-template-columns: repeat(2, 1fr); gap: 12px; }
     .table-pick-btn {
-      background: var(--surface); border: 1px solid var(--border-soft); border-radius: var(--radius);
-      padding: 18px 10px; text-align: center; color: var(--text); font-weight: 700; font-size: 1rem;
-      cursor: pointer; transition: transform 0.15s var(--ease), box-shadow 0.2s var(--ease);
+      background: linear-gradient(160deg, rgba(0,229,255,0.08), rgba(13,23,39,0.92));
+      border: 1px solid var(--border-soft); clip-path: var(--chamfer-sm);
+      padding: 22px 10px; text-align: center; color: var(--text); font-weight: 700; font-size: 1.05rem;
+      font-family: "Orbitron", "Poppins", sans-serif;
+      cursor: pointer; transition: transform 0.15s var(--ease), box-shadow 0.2s var(--ease), border-color 0.2s var(--ease);
     }
-    .table-pick-btn:hover { transform: translateY(-2px); box-shadow: var(--glow-cyan); border-color: var(--neon-cyan); }
+    .table-pick-btn:hover { transform: translateY(-3px); box-shadow: var(--glow-cyan); border-color: var(--neon-cyan); }
+    .table-pick-btn:active { transform: translateY(0) scale(0.98); }
+
     .menu-item {
       display: flex; align-items: center; justify-content: space-between; gap: 10px;
-      background: var(--surface); border: 1px solid var(--border); border-radius: 10px;
-      padding: 12px 14px; margin-bottom: 10px;
+      background: var(--surface); border: 1px solid var(--border); clip-path: var(--chamfer-sm);
+      padding: 14px 16px; margin-bottom: 10px; transition: border-color 0.2s var(--ease);
     }
+    .menu-item:hover { border-color: rgba(0,229,255,0.4); }
     .menu-item-info { flex: 1; min-width: 0; }
     .menu-item-name { font-weight: 600; }
-    .menu-item-price { color: var(--muted); font-size: 0.82rem; margin-top: 2px; }
+    .menu-item-price { color: var(--muted); font-size: 0.82rem; margin-top: 2px; font-family: "Orbitron", sans-serif; }
     .menu-item-qty { display: flex; align-items: center; gap: 8px; }
     .qty-btn {
-      width: 30px; height: 30px; border-radius: 6px; border: 1px solid var(--border-soft);
-      background: var(--surface-2); color: var(--neon-cyan-soft); font-size: 1.1rem; font-weight: 700;
+      width: 32px; height: 32px; border-radius: 6px; border: 1px solid var(--border-soft);
+      background: var(--surface-2); color: var(--neon-cyan-soft); font-size: 1.2rem; font-weight: 700;
       cursor: pointer; display: flex; align-items: center; justify-content: center;
+      transition: transform 0.15s var(--ease), box-shadow 0.2s var(--ease);
     }
-    .qty-val { min-width: 22px; text-align: center; font-weight: 700; }
+    .qty-btn:hover { box-shadow: var(--glow-cyan); }
+    .qty-btn:active { transform: scale(0.9); }
+    .qty-val { min-width: 22px; text-align: center; font-weight: 700; font-family: "Orbitron", sans-serif; }
+
     .cart-bar {
       position: fixed; bottom: 0; left: 0; right: 0; z-index: 25;
       background: rgba(9, 14, 26, 0.96); backdrop-filter: blur(10px);
-      border-top: 1px solid var(--border-soft); padding: 12px 16px;
+      border-top: 1px solid var(--border-soft); padding: 14px 18px;
       display: flex; align-items: center; justify-content: space-between; gap: 14px;
+      box-shadow: 0 -4px 20px rgba(0,0,0,0.4);
     }
-    .cart-bar-total { font-weight: 700; font-family: "Orbitron", sans-serif; color: var(--neon-cyan-soft); }
-    .order-back { background: none; border: none; color: var(--neon-cyan-soft); cursor: pointer; font-size: 0.9rem; margin-bottom: 12px; padding: 0; }
-    .order-confirm-box { text-align: center; padding: 40px 10px; }
-    .order-confirm-box .big-check { font-size: 3rem; margin-bottom: 10px; }
+    .cart-bar-total { font-weight: 700; font-family: "Orbitron", sans-serif; color: var(--neon-cyan-soft); text-shadow: 0 0 10px rgba(0,229,255,0.4); }
+    .order-back { background: none; border: none; color: var(--neon-cyan-soft); cursor: pointer; font-size: 0.9rem; margin-bottom: 14px; padding: 0; }
+    .order-confirm-box { text-align: center; padding: 50px 10px; }
+    .order-confirm-box .big-check { font-size: 3.2rem; margin-bottom: 12px; filter: drop-shadow(0 0 14px rgba(63,237,181,0.6)); }
+    .order-confirm-box h2 { font-family: "Poppins", sans-serif; }
   </style>
 </head>
 <body>
-  <div class="order-page">
-    <div class="order-header">
-      <img src="logo.png?v=14" alt="Хилчин Биллиард" />
-      <h1>Хилчин Биллиард — Захиалга</h1>
-    </div>
+  <div class="order-navbar">
+    <img src="logo.png?v=15" alt="Хилчин Биллиард" class="nav-logo" />
+    <div class="order-brand">Хилчин Биллиард — Захиалга</div>
+  </div>
 
+  <div class="order-page">
     <div id="hb-error" class="error-box hidden"></div>
 
     <!-- Алхам 1: Ширээ сонгох -->
     <div id="hb-step-table" class="order-step active">
-      <p class="muted" style="margin-bottom:14px;">Та сууж буй ширээгээ сонгоно уу:</p>
+      <p class="order-step-title">Та сууж буй ширээгээ сонгоно уу</p>
       <div id="hb-table-grid" class="table-pick-grid">
         <p class="muted">Ачааллаж байна...</p>
       </div>
@@ -66,7 +96,7 @@
     <!-- Алхам 2: Цэс сонгох -->
     <div id="hb-step-menu" class="order-step">
       <button type="button" class="order-back" id="hb-back-to-table">← Ширээгээ солих</button>
-      <p class="muted" style="margin-bottom:6px;"><strong id="hb-selected-table-name"></strong> — цэснээс сонгоно уу:</p>
+      <p class="order-step-title"><span id="hb-selected-table-name"></span> — цэснээс сонгоно уу</p>
       <div id="hb-menu-list"></div>
       <div class="form-group" style="margin-top:16px;">
         <label for="hb-order-note">Нэмэлт тэмдэглэл (заавал биш)</label>
@@ -91,8 +121,8 @@
   </div>
 
   <script src="https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2/dist/umd/supabase.min.js"></script>
-  <script src="config.js?v=14"></script>
-  <script src="supabaseClient.js?v=14"></script>
-  <script src="order.js?v=14"></script>
+  <script src="config.js?v=15"></script>
+  <script src="supabaseClient.js?v=15"></script>
+  <script src="order.js?v=15"></script>
 </body>
 </html>

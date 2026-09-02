@@ -4,7 +4,7 @@
   <meta charset="UTF-8" />
   <meta name="viewport" content="width=device-width, initial-scale=1.0" />
   <title>Захиалга — Хилчин Биллиард</title>
-  <link rel="stylesheet" href="style.css?v=14" />
+  <link rel="stylesheet" href="style.css?v=15" />
 </head>
 <body>
   <div id="hb-navbar"></div>
@@ -39,17 +39,16 @@
       <div class="modal-title">QR цэс</div>
       <p class="muted" style="margin-bottom:14px;">Энэ QR-г хэвлээд ширээн дээр байрлуулбал харилцагч утсаараа уншиж захиалга өгөх боломжтой болно.</p>
       <div style="background:#fff; padding:16px; border-radius:10px; display:flex; justify-content:center;">
-        <canvas id="hb-qr-canvas"></canvas>
+        <img id="hb-qr-img" width="220" height="220" alt="QR код" />
       </div>
       <p class="muted" style="margin-top:12px; font-size:0.8rem; word-break:break-all;" id="hb-qr-url"></p>
     </div>
   </div>
 
   <script src="https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2/dist/umd/supabase.min.js"></script>
-  <script src="https://cdn.jsdelivr.net/npm/qrcode@1.5.3/build/qrcode.min.js"></script>
-  <script src="config.js?v=14"></script>
-  <script src="supabaseClient.js?v=14"></script>
-  <script src="auth.js?v=14"></script>
-  <script src="orders.js?v=14"></script>
+  <script src="config.js?v=15"></script>
+  <script src="supabaseClient.js?v=15"></script>
+  <script src="auth.js?v=15"></script>
+  <script src="orders.js?v=15"></script>
 </body>
 </html>

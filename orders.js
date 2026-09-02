@@ -177,9 +177,9 @@ const HB_Orders = {
   showQr() {
     const url = `${window.location.origin}/order.html`;
     document.getElementById("hb-qr-url").textContent = url;
-    const canvas = document.getElementById("hb-qr-canvas");
-    if (window.QRCode && canvas) {
-      window.QRCode.toCanvas(canvas, url, { width: 220, margin: 1 });
+    const img = document.getElementById("hb-qr-img");
+    if (img) {
+      img.src = `https://api.qrserver.com/v1/create-qr-code/?size=240x240&data=${encodeURIComponent(url)}`;
     }
     document.getElementById("hb-qr-overlay").classList.remove("hidden");
   },
