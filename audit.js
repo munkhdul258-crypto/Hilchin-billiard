@@ -12,6 +12,7 @@ const HB_Audit = {
     expenses: "Зарлага",
     debts: "Зээл",
     stock_requests: "Барааны хүсэлт",
+    cash_movements: "Кассын гар хөдөлгөөн",
     settings: "Тохиргоо",
     announcements: "Мэдэгдэл",
     shift_handovers: "Ээлж хүлээлцэлт",

@@ -4,7 +4,7 @@
   <meta charset="UTF-8" />
   <meta name="viewport" content="width=device-width, initial-scale=1.0" />
   <title>Ээлж — Хилчин Биллиард</title>
-  <link rel="stylesheet" href="style.css?v=17" />
+  <link rel="stylesheet" href="style.css?v=18" />
 </head>
 <body>
   <div id="hb-navbar"></div>
@@ -33,7 +33,7 @@
 
     <div class="stats-grid">
       <div class="stat-card">
-        <div class="stat-label">Энэ ээлжийн орлого</div>
+        <div class="stat-label">Системийн тооцоолсон орлого</div>
         <div class="stat-value" id="hb-shift-revenue">0₮</div>
       </div>
       <div class="stat-card">
@@ -52,56 +52,159 @@
 
     <div class="stats-grid">
       <div class="stat-card">
-        <div class="stat-label">💵 Бэлэн мөнгө</div>
+        <div class="stat-label">💵 Бэлэн (систем)</div>
         <div class="stat-value" id="hb-shift-cash">0₮</div>
       </div>
       <div class="stat-card">
-        <div class="stat-label">🏦 Дансны шилжүүлэг</div>
+        <div class="stat-label">🏦 Шилжүүлэг (систем)</div>
         <div class="stat-value" id="hb-shift-transfer">0₮</div>
       </div>
       <div class="stat-card">
-        <div class="stat-label">💳 POS / карт</div>
+        <div class="stat-label">💳 POS / карт (систем)</div>
         <div class="stat-value" id="hb-shift-pos">0₮</div>
       </div>
     </div>
 
-    <div class="two-col">
-      <div>
-        <div class="section-title" style="margin-top:0;">Ээлж хаах</div>
-        <div class="card">
-          <form id="hb-shift-form">
-            <div class="form-group" style="margin-bottom:14px;">
-              <label for="hb-shift-note">Тэмдэглэл (бэлэн мөнгө, дутагдал гэх мэт)</label>
-              <textarea id="hb-shift-note" rows="3" placeholder="жишээ: касс дэх бэлэн мөнгө 350,000₮, бүгд тэнцсэн" style="border:1px solid var(--border); border-radius:9px; padding:10px 12px; background:var(--surface-2); color:var(--text); font-family:inherit; font-size:0.92rem; resize:vertical;"></textarea>
-            </div>
-            <button type="submit" class="btn btn-primary btn-full">Ээлж хаах ба хүлээлцэх</button>
-          </form>
+    <div class="section-title" style="margin-top:0;">Кассын гар хөдөлгөөн (урьдчилгаа / бусад зохицуулалт)</div>
+    <p class="muted" style="margin-bottom:12px; font-size:0.85rem;">
+      Ажилтанд өгсөн урьдчилгаа, гэнэтийн зардал, POS-ын залруулга гэх мэт системд автоматаар бүртгэгддэггүй
+      мөнгөний хөдөлгөөнийг энд оруулаад өгвөл, доорх эцсийн тооцоо зөвхөн ЖИНХЭНЭ тайлбарлагдаагүй зөрүүг харуулна.
+    </p>
+    <div class="card" style="margin-bottom:16px;">
+      <form id="hb-movement-form" class="cash-movement-form">
+        <div class="form-group">
+          <label for="hb-mv-direction">Чиглэл</label>
+          <select id="hb-mv-direction">
+            <option value="out">Гарсан (кассаас авсан)</option>
+            <option value="in">Орсон (кассанд буцаж орсон)</option>
+          </select>
         </div>
-      </div>
-      <div>
-        <div class="section-title" style="margin-top:0;">Одоогийн барааны үлдэгдэл</div>
-        <table class="data-table">
-          <thead>
-            <tr><th>Бараа</th><th>Үлдэгдэл</th></tr>
-          </thead>
-          <tbody id="hb-shift-stock-body"></tbody>
-        </table>
-      </div>
+        <div class="form-group">
+          <label for="hb-mv-category">Төрөл</label>
+          <select id="hb-mv-category">
+            <option value="advance">Ажилтны урьдчилгаа (буцаан төлнө)</option>
+            <option value="other">Бусад тохиолдлын зохицуулалт</option>
+          </select>
+        </div>
+        <div class="form-group">
+          <label for="hb-mv-method">Төлбөрийн хэлбэр</label>
+          <select id="hb-mv-method">
+            <option value="cash">Бэлэн</option>
+            <option value="transfer">Шилжүүлэг</option>
+            <option value="pos">POS</option>
+          </select>
+        </div>
+        <div class="form-group">
+          <label for="hb-mv-amount">Дүн (₮)</label>
+          <input type="number" id="hb-mv-amount" min="0" step="1000" required />
+        </div>
+        <div class="form-group">
+          <label for="hb-mv-person">Хэн / Хэнд</label>
+          <input type="text" id="hb-mv-person" placeholder="жишээ: Баатараа ах" />
+        </div>
+        <div class="form-group" style="flex:2; min-width:200px;">
+          <label for="hb-mv-reason">Шалтгаан</label>
+          <input type="text" id="hb-mv-reason" placeholder="жишээ: цалингийн урьдчилгаа" />
+        </div>
+        <button type="submit" class="btn btn-primary">+ Бүртгэх</button>
+      </form>
     </div>
+
+    <table class="data-table" style="margin-bottom:16px;">
+      <thead>
+        <tr><th>Огноо</th><th>Чиглэл</th><th>Төрөл</th><th>Хэлбэр</th><th>Хэн</th><th>Шалтгаан</th><th>Дүн</th><th></th></tr>
+      </thead>
+      <tbody id="hb-movements-body"></tbody>
+    </table>
+
+    <div id="hb-advances-wrap" class="hidden">
+      <div class="section-title">Ажилтны барагдаагүй урьдчилгаа</div>
+      <table class="data-table" style="margin-bottom:16px;">
+        <thead>
+          <tr><th>Огноо</th><th>Хэн</th><th>Шалтгаан</th><th>Дүн</th><th></th></tr>
+        </thead>
+        <tbody id="hb-advances-body"></tbody>
+      </table>
+    </div>
+
+    <div class="section-title">Ээлжийн эцсийн тооцоо (нягтлан)</div>
+    <div class="card" style="margin-bottom:20px;">
+      <form id="hb-shift-form">
+        <div class="reconcile-block">
+          <div class="reconcile-row subtle">
+            <span>Өмнөх ээлжээс шилжсэн бэлэн</span>
+            <input type="number" id="hb-rc-opening" class="reconcile-input" step="1000" value="0" />
+          </div>
+          <div class="reconcile-row subtle"><span>+ Энэ ээлжийн бэлэн орлого (систем)</span><span class="reconcile-val" id="hb-rc-cash-rev">0₮</span></div>
+          <div class="reconcile-row subtle"><span>− Зарлага (бэлэнээр)</span><span class="reconcile-val" id="hb-rc-expense">0₮</span></div>
+          <div class="reconcile-row subtle"><span>− Урьдчилгаа / зохицуулалт (бэлэн)</span><span class="reconcile-val" id="hb-rc-cash-mv">0₮</span></div>
+          <div class="reconcile-row total">
+            <span>Хүлээгдэж буй бэлэн</span><span class="reconcile-val" id="hb-rc-expected-cash">0₮</span>
+          </div>
+          <div class="reconcile-row">
+            <span>Бодит тоолсон бэлэн</span>
+            <input type="number" id="hb-rc-counted-cash" class="reconcile-input" step="1000" required />
+          </div>
+          <div class="reconcile-row grand">
+            <span>Бэлэн мөнгөний ЗӨРҮҮ</span><span class="reconcile-val" id="hb-rc-cash-diff">0₮</span>
+          </div>
+        </div>
+
+        <div class="reconcile-block">
+          <div class="reconcile-row subtle"><span>Шилжүүлгийн орлого (систем)</span><span class="reconcile-val" id="hb-rc-transfer-sys">0₮</span></div>
+          <div class="reconcile-row">
+            <span>Банкаар баталгаажсан шилжүүлэг</span>
+            <input type="number" id="hb-rc-counted-transfer" class="reconcile-input" step="1000" />
+          </div>
+          <div class="reconcile-row grand">
+            <span>Шилжүүлгийн ЗӨРҮҮ</span><span class="reconcile-val" id="hb-rc-transfer-diff">0₮</span>
+          </div>
+        </div>
+
+        <div class="reconcile-block">
+          <div class="reconcile-row subtle"><span>POS орлого (систем)</span><span class="reconcile-val" id="hb-rc-pos-sys">0₮</span></div>
+          <div class="reconcile-row">
+            <span>POS терминалын баталгаажсан дүн</span>
+            <input type="number" id="hb-rc-counted-pos" class="reconcile-input" step="1000" />
+          </div>
+          <div class="reconcile-row grand">
+            <span>POS-ын ЗӨРҮҮ</span><span class="reconcile-val" id="hb-rc-pos-diff">0₮</span>
+          </div>
+        </div>
+
+        <div class="reconcile-row grand" style="border-top:2px solid var(--neon-pink); padding-top:14px; margin-top:14px;">
+          <span>НИЙТ ТАЙЛБАРЛАГДААГҮЙ ЗӨРҮҮ</span><span class="reconcile-val" id="hb-rc-total-diff">0₮</span>
+        </div>
+
+        <div class="form-group" style="margin:16px 0 14px;">
+          <label for="hb-shift-note">Тэмдэглэл</label>
+          <textarea id="hb-shift-note" rows="3" placeholder="жишээ: 34,000₮ дутагдлын шалтгаан тодорхойгүй, дараагийн ээлжид анхаарах" style="border:1px solid var(--border); border-radius:9px; padding:10px 12px; background:var(--surface-2); color:var(--text); font-family:inherit; font-size:0.92rem; resize:vertical; width:100%;"></textarea>
+        </div>
+        <button type="submit" class="btn btn-primary btn-full">Ээлж хаах ба хүлээлцэх</button>
+      </form>
+    </div>
+
+    <div class="section-title" style="margin-top:0;">Одоогийн барааны үлдэгдэл</div>
+    <table class="data-table" style="margin-bottom:20px;">
+      <thead>
+        <tr><th>Бараа</th><th>Үлдэгдэл</th></tr>
+      </thead>
+      <tbody id="hb-shift-stock-body"></tbody>
+    </table>
 
     <div class="section-title">Ээлж хүлээлцсэн түүх</div>
     <table class="data-table">
       <thead>
-        <tr><th>Огноо</th><th>Хаасан ажилтан</th><th>Орлого</th><th>Зарлага</th><th>Цэвэр</th><th>Тэмдэглэл</th></tr>
+        <tr><th>Огноо</th><th>Хаасан ажилтан</th><th>Орлого</th><th>Зарлага</th><th>Цэвэр</th><th>Бэлэн зөрүү</th><th>Нийт зөрүү</th><th>Тэмдэглэл</th></tr>
       </thead>
       <tbody id="hb-shift-history-body"></tbody>
     </table>
   </div>
 
   <script src="https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2/dist/umd/supabase.min.js"></script>
-  <script src="config.js?v=17"></script>
-  <script src="supabaseClient.js?v=17"></script>
-  <script src="auth.js?v=17"></script>
-  <script src="shift.js?v=17"></script>
+  <script src="config.js?v=18"></script>
+  <script src="supabaseClient.js?v=18"></script>
+  <script src="auth.js?v=18"></script>
+  <script src="shift.js?v=18"></script>
 </body>
 </html>
