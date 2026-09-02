@@ -67,10 +67,11 @@ const HB_Auth = {
 
     el.innerHTML = `
       <div class="nav-inner">
-        <div class="nav-brand"><img src="logo.png?v=13" alt="Хилчин Биллиард" class="nav-logo" /> Хилчин Биллиард</div>
+        <div class="nav-brand"><img src="logo.png?v=14" alt="Хилчин Биллиард" class="nav-logo" /> Хилчин Биллиард</div>
         <button type="button" id="hb-nav-toggle" class="nav-toggle" aria-label="Цэс">☰</button>
         <nav class="nav-links" id="hb-nav-links">
           ${link("index.html", "Ширээ", "tables")}
+          ${link("orders.html", "Захиалга", "orders")}
           ${link("inventory.html", "Бараа материал", "inventory")}
           ${link("debts.html", "Зээл", "debts")}
           ${link("shift.html", "Ээлж", "shift")}
@@ -119,6 +120,10 @@ const HB_Auth = {
           .select("id, started_at, planned_hours, billiard_tables(name)")
           .eq("status", "active")
           .not("planned_hours", "is", null),
+        window.supabaseClient
+          .from("customer_orders")
+          .select("id, table_id, billiard_tables(name)")
+          .eq("status", "pending"),
       ];
       if (isAdmin) {
         queries.push(
@@ -138,10 +143,12 @@ const HB_Auth = {
         const elapsedHours = (Date.now() - new Date(s.started_at).getTime()) / 3600000;
         return elapsedHours >= s.planned_hours;
       });
-      const pendingStock = isAdmin ? results[2].data || [] : [];
-      const overdueDebts = isAdmin ? results[3].data || [] : [];
+      const pendingOrders = results[2].data || [];
+      const pendingStock = isAdmin ? results[3].data || [] : [];
+      const overdueDebts = isAdmin ? results[4].data || [] : [];
 
-      const count = announcements.length + overdueSessions.length + pendingStock.length + overdueDebts.length;
+      const count =
+        announcements.length + overdueSessions.length + pendingOrders.length + pendingStock.length + overdueDebts.length;
       const dot = document.getElementById("hb-bell-dot");
       const panel = document.getElementById("hb-bell-panel");
       if (!dot || !panel) return;
@@ -158,6 +165,11 @@ const HB_Auth = {
       overdueSessions.forEach((s) =>
         items.push(
           `<div class="bell-item">⏰ <a href="index.html">${s.billiard_tables ? s.billiard_tables.name : "Ширээ"}</a> — захиалсан цаг дууссан</div>`
+        )
+      );
+      pendingOrders.forEach((o) =>
+        items.push(
+          `<div class="bell-item">🧾 <a href="orders.html">${o.billiard_tables ? o.billiard_tables.name : "Ширээ"}</a> — шинэ захиалга ирлээ</div>`
         )
       );
       pendingStock.forEach((r) =>
@@ -189,6 +201,7 @@ const HB_Auth = {
       .on("postgres_changes", { event: "*", schema: "public", table: "debts" }, refresh)
       .on("postgres_changes", { event: "*", schema: "public", table: "announcements" }, refresh)
       .on("postgres_changes", { event: "*", schema: "public", table: "sessions" }, refresh)
+      .on("postgres_changes", { event: "*", schema: "public", table: "customer_orders" }, refresh)
       .subscribe();
   },
 };
