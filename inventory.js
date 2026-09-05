@@ -2,6 +2,7 @@
 
 const HB_Inventory = {
   isAdmin: false,
+  products: [],
 
   async init() {
     const ctx = await HB_Auth.requireAuth();
@@ -16,6 +17,12 @@ const HB_Inventory = {
 
     document.getElementById("hb-stock-form").addEventListener("submit", (e) => this.handleSubmit(e));
     document.getElementById("hb-receipt-file").addEventListener("change", (e) => this.previewFile(e));
+
+    document.getElementById("hb-edit-form").addEventListener("submit", (e) => this.handleEditSubmit(e));
+    document.getElementById("hb-edit-close").addEventListener("click", () => this.closeEditModal());
+    document.getElementById("hb-edit-overlay").addEventListener("click", (e) => {
+      if (e.target.id === "hb-edit-overlay") this.closeEditModal();
+    });
 
     await this.loadProducts();
     await this.loadRequests();
@@ -34,9 +41,11 @@ const HB_Inventory = {
     const { data, error } = await window.supabaseClient.from("products").select("*").order("name");
     if (error) return this.showError(error.message);
 
+    this.products = data || [];
+
     const tbody = document.getElementById("hb-products-body");
-    tbody.innerHTML = (data || []).length
-      ? data
+    tbody.innerHTML = this.products.length
+      ? this.products
           .map(
             (p) => `
         <tr>
@@ -44,10 +53,23 @@ const HB_Inventory = {
           <td>${p.category || "—"}</td>
           <td>${p.quantity} ${p.unit}</td>
           <td>${this.formatMoney(p.unit_price)}</td>
+          <td>${
+            this.isAdmin
+              ? `<button class="btn btn-ghost btn-sm" data-action="edit-product" data-id="${p.id}">✏️</button>
+                 <button class="btn btn-ghost btn-sm" data-action="delete-product" data-id="${p.id}">🗑️</button>`
+              : ""
+          }</td>
         </tr>`
           )
           .join("")
-      : `<tr><td colspan="4" class="muted">Нөөц хоосон байна</td></tr>`;
+      : `<tr><td colspan="5" class="muted">Нөөц хоосон байна</td></tr>`;
+
+    tbody.querySelectorAll('[data-action="edit-product"]').forEach((btn) =>
+      btn.addEventListener("click", () => this.openEditModal(btn.dataset.id))
+    );
+    tbody.querySelectorAll('[data-action="delete-product"]').forEach((btn) =>
+      btn.addEventListener("click", () => this.deleteProduct(btn.dataset.id))
+    );
   },
 
   async loadRequests() {
@@ -217,6 +239,63 @@ const HB_Inventory = {
 
     await this.loadProducts();
     await this.loadRequests();
+  },
+
+  openEditModal(id) {
+    if (!this.isAdmin) return;
+    const p = this.products.find((x) => x.id === id);
+    if (!p) return;
+    document.getElementById("hb-edit-id").value = p.id;
+    document.getElementById("hb-edit-name").value = p.name;
+    document.getElementById("hb-edit-category").value = p.category || "";
+    document.getElementById("hb-edit-unit").value = p.unit || "ширхэг";
+    document.getElementById("hb-edit-qty").value = p.quantity;
+    document.getElementById("hb-edit-price").value = p.unit_price;
+    document.getElementById("hb-edit-overlay").classList.remove("hidden");
+  },
+
+  closeEditModal() {
+    document.getElementById("hb-edit-overlay").classList.add("hidden");
+  },
+
+  async handleEditSubmit(e) {
+    e.preventDefault();
+    if (!this.isAdmin) return;
+
+    const id = document.getElementById("hb-edit-id").value;
+    const name = document.getElementById("hb-edit-name").value.trim();
+    const category = document.getElementById("hb-edit-category").value.trim();
+    const unit = document.getElementById("hb-edit-unit").value.trim() || "ширхэг";
+    const quantity = parseFloat(document.getElementById("hb-edit-qty").value);
+    const unitPrice = parseFloat(document.getElementById("hb-edit-price").value);
+    if (!name || isNaN(quantity) || isNaN(unitPrice)) return;
+
+    const { error } = await window.supabaseClient
+      .from("products")
+      .update({ name, category, unit, quantity, unit_price: unitPrice, updated_at: new Date().toISOString() })
+      .eq("id", id);
+
+    if (error) {
+      this.showError("Бараа засахад алдаа гарлаа: " + error.message);
+      return;
+    }
+
+    this.closeEditModal();
+    await this.loadProducts();
+  },
+
+  async deleteProduct(id) {
+    if (!this.isAdmin) return;
+    const p = this.products.find((x) => x.id === id);
+    if (!p) return;
+    if (!confirm(`"${p.name}"-г нөөцөөс бүрмөсөн устгах уу?`)) return;
+
+    const { error } = await window.supabaseClient.from("products").delete().eq("id", id);
+    if (error) {
+      this.showError("Бараа устгахад алдаа гарлаа: " + error.message);
+      return;
+    }
+    await this.loadProducts();
   },
 
   formatMoney(n) {

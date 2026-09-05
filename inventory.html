@@ -4,7 +4,7 @@
   <meta charset="UTF-8" />
   <meta name="viewport" content="width=device-width, initial-scale=1.0" />
   <title>Бараа материал — Хилчин Биллиард</title>
-  <link rel="stylesheet" href="style.css?v=19" />
+  <link rel="stylesheet" href="style.css?v=20" />
 </head>
 <body>
   <div id="hb-navbar"></div>
@@ -63,7 +63,7 @@
         <div class="section-title" style="margin-top:0;">Одоогийн нөөц</div>
         <table class="data-table">
           <thead>
-            <tr><th>Бараа</th><th>Төрөл</th><th>Үлдэгдэл</th><th>Үнэ</th></tr>
+            <tr><th>Бараа</th><th>Төрөл</th><th>Үлдэгдэл</th><th>Үнэ</th><th></th></tr>
           </thead>
           <tbody id="hb-products-body"></tbody>
         </table>
@@ -79,10 +79,45 @@
     </table>
   </div>
 
+  <div id="hb-edit-overlay" class="modal-overlay hidden">
+    <div class="modal">
+      <button type="button" class="modal-close" id="hb-edit-close">×</button>
+      <div class="modal-title">Бараа засах</div>
+      <form id="hb-edit-form">
+        <input type="hidden" id="hb-edit-id" />
+        <div class="form-group" style="margin-bottom:10px;">
+          <label for="hb-edit-name">Барааны нэр</label>
+          <input type="text" id="hb-edit-name" required />
+        </div>
+        <div class="form-row" style="margin-bottom:10px;">
+          <div class="form-group">
+            <label for="hb-edit-category">Төрөл</label>
+            <input type="text" id="hb-edit-category" />
+          </div>
+          <div class="form-group">
+            <label for="hb-edit-unit">Нэгж</label>
+            <input type="text" id="hb-edit-unit" />
+          </div>
+        </div>
+        <div class="form-row" style="margin-bottom:14px;">
+          <div class="form-group">
+            <label for="hb-edit-qty">Үлдэгдэл</label>
+            <input type="number" id="hb-edit-qty" min="0" step="1" required />
+          </div>
+          <div class="form-group">
+            <label for="hb-edit-price">Нэгжийн үнэ (₮)</label>
+            <input type="number" id="hb-edit-price" min="0" step="1" required />
+          </div>
+        </div>
+        <button type="submit" class="btn btn-primary btn-full">Хадгалах</button>
+      </form>
+    </div>
+  </div>
+
   <script src="https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2/dist/umd/supabase.min.js"></script>
-  <script src="config.js?v=19"></script>
-  <script src="supabaseClient.js?v=19"></script>
-  <script src="auth.js?v=19"></script>
-  <script src="inventory.js?v=19"></script>
+  <script src="config.js?v=20"></script>
+  <script src="supabaseClient.js?v=20"></script>
+  <script src="auth.js?v=20"></script>
+  <script src="inventory.js?v=20"></script>
 </body>
 </html>
