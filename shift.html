@@ -4,7 +4,7 @@
   <meta charset="UTF-8" />
   <meta name="viewport" content="width=device-width, initial-scale=1.0" />
   <title>Ээлж — Хилчин Биллиард</title>
-  <link rel="stylesheet" href="style.css?v=20" />
+  <link rel="stylesheet" href="style.css?v=21" />
 </head>
 <body>
   <div id="hb-navbar"></div>
@@ -91,7 +91,7 @@
           </div>
           <div class="form-group">
             <label for="hb-mv-amount">Дүн (₮)</label>
-            <input type="number" id="hb-mv-amount" min="0" step="1000" required />
+            <input type="number" id="hb-mv-amount" min="0" step="1" required />
           </div>
           <div class="form-group">
             <label for="hb-mv-person">Хэнд</label>
@@ -129,7 +129,7 @@
         <div class="admin-only hidden">
           <button type="button" class="rc-details-toggle" id="hb-rc-details-toggle">Дэлгэрэнгүй тооцоо ▾</button>
           <div id="hb-rc-details" class="rc-details hidden">
-            <div class="rc-details-row"><span>Өмнөх ээлжээс шилжсэн бэлэн</span><input type="number" id="hb-rc-opening" class="reconcile-input" step="1000" value="0" style="width:120px;" /></div>
+            <div class="rc-details-row"><span>Өмнөх ээлжээс шилжсэн бэлэн</span><input type="number" id="hb-rc-opening" class="reconcile-input" step="1" value="0" style="width:120px;" /></div>
             <div class="rc-details-row"><span>Бэлэн орлого</span><b id="hb-rc-cash-rev">0₮</b></div>
             <div class="rc-details-row"><span>Зарлага</span><b id="hb-rc-expense">0₮</b></div>
             <div class="rc-details-row"><span>Урьдчилгаа/зохицуулалт</span><b id="hb-rc-cash-mv">0₮</b></div>
@@ -140,26 +140,24 @@
           <div class="rc-row">
             <span class="rc-label">💵 Бэлэн мөнгө</span>
             <span class="rc-expected admin-only hidden">Хүлээгдэх: <b id="hb-rc-expected-cash">0₮</b></span>
-            <input type="number" id="hb-rc-counted-cash" class="reconcile-input" step="1000" placeholder="Тоолсон дүн" required />
+            <input type="number" id="hb-rc-counted-cash" class="reconcile-input" step="1" placeholder="Тоолсон дүн" required />
             <span class="rc-diff-badge diff-even admin-only hidden" id="hb-rc-cash-diff">—</span>
           </div>
 
-          <div class="admin-only hidden">
-            <div class="rc-row">
-              <span class="rc-label">🏦 Шилжүүлэг</span>
-              <span class="rc-expected">Систем: <b id="hb-rc-transfer-sys">0₮</b></span>
-              <input type="number" id="hb-rc-counted-transfer" class="reconcile-input" step="1000" />
-              <span class="rc-diff-badge diff-even" id="hb-rc-transfer-diff">—</span>
-            </div>
-            <div class="rc-row">
-              <span class="rc-label">💳 POS</span>
-              <span class="rc-expected">Систем: <b id="hb-rc-pos-sys">0₮</b></span>
-              <input type="number" id="hb-rc-counted-pos" class="reconcile-input" step="1000" />
-              <span class="rc-diff-badge diff-even" id="hb-rc-pos-diff">—</span>
-            </div>
-            <div class="rc-total-row">
-              <span>Нийт зөрүү</span><span class="rc-diff-badge diff-even" id="hb-rc-total-diff">—</span>
-            </div>
+          <div class="rc-row">
+            <span class="rc-label">🏦 Шилжүүлэг</span>
+            <span class="rc-expected admin-only hidden">Систем: <b id="hb-rc-transfer-sys">0₮</b></span>
+            <input type="number" id="hb-rc-counted-transfer" class="reconcile-input" step="1" placeholder="Тоолсон дүн" />
+            <span class="rc-diff-badge diff-even admin-only hidden" id="hb-rc-transfer-diff">—</span>
+          </div>
+          <div class="rc-row">
+            <span class="rc-label">💳 POS</span>
+            <span class="rc-expected admin-only hidden">Систем: <b id="hb-rc-pos-sys">0₮</b></span>
+            <input type="number" id="hb-rc-counted-pos" class="reconcile-input" step="1" placeholder="Тоолсон дүн" />
+            <span class="rc-diff-badge diff-even admin-only hidden" id="hb-rc-pos-diff">—</span>
+          </div>
+          <div class="rc-total-row admin-only hidden">
+            <span>Нийт зөрүү</span><span class="rc-diff-badge diff-even" id="hb-rc-total-diff">—</span>
           </div>
         </div>
 
@@ -191,9 +189,9 @@
   </div>
 
   <script src="https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2/dist/umd/supabase.min.js"></script>
-  <script src="config.js?v=20"></script>
-  <script src="supabaseClient.js?v=20"></script>
-  <script src="auth.js?v=20"></script>
-  <script src="shift.js?v=20"></script>
+  <script src="config.js?v=21"></script>
+  <script src="supabaseClient.js?v=21"></script>
+  <script src="auth.js?v=21"></script>
+  <script src="shift.js?v=21"></script>
 </body>
 </html>
